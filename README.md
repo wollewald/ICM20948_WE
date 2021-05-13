@@ -14,4 +14,4 @@ If you find bugs please inform me. If you like the library it would be great if 
 If you are not familiar with the ICM20948 I recommend to work through the example sketches.
 
 Known issue:
-* If you upload sketches, the magnetometer sometimes does not respond. If you disconnect from power and then reconnect it will work. I experienced the issue only after uploads.
+* If you upload sketches, the magnetometer occasionally does not respond. If you disconnect from power and then reconnect it will work. I experienced the issue only after uploads.
