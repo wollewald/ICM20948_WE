@@ -21,14 +21,23 @@
 
 /************  Constructors ************/
 
-ICM20948_WE::ICM20948_WE(TwoWire &w, int addr){
-    _wire = &w;
-    i2cAddress = addr;
-    
+ICM20948_WE::ICM20948_WE(int addr){
+    _wire = &Wire;
+    i2cAddress = addr;   
 }
 
-ICM20948_WE::ICM20948_WE(TwoWire &w){
-    _wire = &w;
+ICM20948_WE::ICM20948_WE(){
+    _wire = &Wire;
+    i2cAddress = 0x68;   
+}
+
+ICM20948_WE::ICM20948_WE(TwoWire *w, int addr){
+    _wire = w;
+    i2cAddress = addr; 
+}
+
+ICM20948_WE::ICM20948_WE(TwoWire *w){
+    _wire = w;
     i2cAddress = 0x68;
 }
 
@@ -214,9 +223,9 @@ void ICM20948_WE::readSensor(){
 
 xyzFloat ICM20948_WE::getAccRawValues(){
     xyzFloat accRawVal;
-    accRawVal.x = ((((int16_t)buffer[0]) << 8) | buffer[1]) * 1.0;
-    accRawVal.y = ((((int16_t)buffer[2]) << 8) | buffer[3]) * 1.0;
-    accRawVal.z = ((((int16_t)buffer[4]) << 8) | buffer[5]) * 1.0;
+    accRawVal.x = (int16_t)(((buffer[0]) << 8) | buffer[1]) * 1.0;
+    accRawVal.y = (int16_t)(((buffer[2]) << 8) | (int16_t)buffer[3]) * 1.0;
+    accRawVal.z = (int16_t)(((buffer[4]) << 8) | buffer[5]) * 1.0;
     return accRawVal;
 }
 
@@ -267,7 +276,7 @@ float ICM20948_WE::getResultantG(xyzFloat gVal){
 }
 
 float ICM20948_WE::getTemperature(){
-    int16_t rawTemp = ((((int16_t)buffer[12]) << 8) | buffer[13]) * 1.0;
+    int16_t rawTemp = (int16_t)(((buffer[12]) << 8) | buffer[13]);
     float tmp = (rawTemp*1.0 - ICM20948_ROOM_TEMP_OFFSET)/ICM20948_T_SENSITIVITY + 21.0;
     return tmp;
 }
@@ -275,9 +284,9 @@ float ICM20948_WE::getTemperature(){
 xyzFloat ICM20948_WE::getGyrRawValues(){
     xyzFloat gyrRawVal;
     
-    gyrRawVal.x = ((((int16_t)buffer[6]) << 8) | buffer[7]) * 1.0;
-    gyrRawVal.y = ((((int16_t)buffer[8]) << 8) | buffer[9]) * 1.0;
-    gyrRawVal.z = ((((int16_t)buffer[10]) << 8) | buffer[11]) * 1.0;
+    gyrRawVal.x = (int16_t)(((buffer[6]) << 8) | buffer[7]) * 1.0;
+    gyrRawVal.y = (int16_t)(((buffer[8]) << 8) | buffer[9]) * 1.0;
+    gyrRawVal.z = (int16_t)(((buffer[10]) << 8) | buffer[11]) * 1.0;
     
     return gyrRawVal;
 }
@@ -314,9 +323,9 @@ xyzFloat ICM20948_WE::getMagValues(){
     int16_t x,y,z;
     xyzFloat mag;
     
-    x = (((int16_t)buffer[15]) << 8) | buffer[14];
-    y = (((int16_t)buffer[17]) << 8) | buffer[16];
-    z = (((int16_t)buffer[19]) << 8) | buffer[18];
+    x = (int16_t)((buffer[15]) << 8) | buffer[14];
+    y = (int16_t)((buffer[17]) << 8) | buffer[16];
+    z = (int16_t)((buffer[19]) << 8) | buffer[18];
     
     mag.x = x * AK09916_MAG_LSB;
     mag.y = y * AK09916_MAG_LSB;

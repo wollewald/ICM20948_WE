@@ -238,8 +238,10 @@ public:
     
     /* Constructors */
     
-    ICM20948_WE(TwoWire &w, int addr);
-    ICM20948_WE(TwoWire &w);           
+    ICM20948_WE(int addr);
+    ICM20948_WE();
+    ICM20948_WE(TwoWire *w, int addr);
+    ICM20948_WE(TwoWire *w);           
     
    
    /* Basic settings */
