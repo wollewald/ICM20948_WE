@@ -129,7 +129,7 @@ void setup() {
    *    GSRD = Gyroscope Sample Rate Divider (0...255)
    *    You achieve lowest noise using level 6  
    */
-  myIMU.setTempDlpf(ICM20948_DLPF_6); // lowest noise for calibration
+  myIMU.setTempDLPF(ICM20948_DLPF_6); // lowest noise for calibration
 }
 
 void loop() {
