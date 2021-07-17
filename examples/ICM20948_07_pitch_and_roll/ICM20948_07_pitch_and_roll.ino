@@ -59,7 +59,7 @@ void setup() {
   myIMU.autoOffsets();
   Serial.println("Done!"); 
   
-  /* enables or disables the acceleration sensor, dafault: enabled */
+  /* enables or disables the acceleration sensor, default: enabled */
   // myIMU.enableAcc(true);
 
   /*  ICM20948_ACC_RANGE_2G      2 g   (default)
