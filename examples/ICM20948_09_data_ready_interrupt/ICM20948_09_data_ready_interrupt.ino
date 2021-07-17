@@ -51,10 +51,10 @@ void setup() {
   /*  The starting point, if you position the ICM20948 flat, is not necessarily 0g/0g/1g for x/y/z. 
    *  The autoOffset function measures offset. It assumes your ICM20948 is positioned flat with its 
    *  x,y-plane. The more you deviate from this, the less accurate will be your results.
-   *  It overwrites the zero points of setAccOffsets, but keeps the the correction of the slope.
+   *  It overwrites the zero points of setAccOffsets, but keeps the correction of the slope.
    *  The function also measures the offset of the gyroscope data. The gyroscope offset does not   
    *  depend on the positioning.
-   *  This function needs to be called after setAccOffsets but before other other settings since it will 
+   *  This function needs to be called after setAccOffsets but before other settings since it will 
    *  overwrite settings!
    */
 //  Serial.println("Position your ICM20948 flat and don't move it - calibrating...");
@@ -70,7 +70,7 @@ void setup() {
   myIMU.setGyrOffsets(-115.0, 130.0, 105.0);
   
   
-  /* enables or disables the acceleration sensor, dafault: enabled */
+  /* enables or disables the acceleration sensor, default: enabled */
   //myIMU.enableAcc(false);
 
   /*  ICM20948_ACC_RANGE_2G      2 g   (default)
@@ -108,7 +108,7 @@ void setup() {
    */
   myIMU.setAccSampleRateDivider(4095);
   
-  /* enables or disables the gyroscope sensor, dafault: enabled */
+  /* enables or disables the gyroscope sensor, default: enabled */
   myIMU.enableGyr(false);
 
   /*  ICM20948_GYRO_RANGE_250       250 degrees per second (default)
