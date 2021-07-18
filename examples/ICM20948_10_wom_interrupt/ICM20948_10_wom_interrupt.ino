@@ -143,7 +143,7 @@ void setup() {
    */
   myIMU.setWakeOnMotionThreshold(128, ICM20948_WOM_COMP_DISABLE);
   attachInterrupt(digitalPinToInterrupt(intPin), motionISR, RISING);
-  Serial.println("Turn your MPU9250 and see what happens...");
+  Serial.println("Turn your ICM-20948 and see what happens...");
   myIMU.readAndClearInterrupts();
   motion = false;
  }
