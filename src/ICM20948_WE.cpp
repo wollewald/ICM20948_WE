@@ -853,13 +853,13 @@ xyzFloat ICM20948_WE::readICM20948xyzValFromFifo(){
     xyzFloat xyzResult = {0.0, 0.0, 0.0};
     MSByte = readRegister8(0, ICM20948_FIFO_R_W);
     LSByte = readRegister8(0, ICM20948_FIFO_R_W);
-    xyzResult.x = (MSByte<<8) + LSByte;
+    xyzResult.x = ((int16_t)((MSByte<<8) + LSByte)) * 1.0;
     MSByte = readRegister8(0, ICM20948_FIFO_R_W);
     LSByte = readRegister8(0, ICM20948_FIFO_R_W);
-    xyzResult.y = (MSByte<<8) + LSByte;
+    xyzResult.y = ((int16_t)((MSByte<<8) + LSByte)) * 1.0;
     MSByte = readRegister8(0, ICM20948_FIFO_R_W);
     LSByte = readRegister8(0, ICM20948_FIFO_R_W);
-    xyzResult.z = (MSByte<<8) + LSByte;
+    xyzResult.z = ((int16_t)((MSByte<<8) + LSByte)) * 1.0;
     return xyzResult; 
 }
 
