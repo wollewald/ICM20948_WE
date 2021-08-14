@@ -4,10 +4,10 @@
 * This sketch shows how to retrieve accelerometer, gyroscope, temperature
 * and magnetometer data from the ICM20948.
 * 
-* Further information can be found soon on:
+* Further information can be found on:
 *
-* https://wolles-elektronikkiste.de/ (German)
-* https://wolles-elektronikkiste.de/en/ (English)
+* https://wolles-elektronikkiste.de/icm-20948-9-achsensensor-teil-i (German)
+* https://wolles-elektronikkiste.de/en/icm-20948-9-axis-sensor-part-i (English)
 * 
 ***************************************************************************/
 
