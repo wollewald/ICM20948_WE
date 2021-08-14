@@ -6,10 +6,10 @@
 * when the wake-on-motion conditions are met. To me the name "wake on motion" is 
 * a bit misleading. It's just an acceleration controlled interrupt.
 * 
-* Further information can be found soon on:
+* Further information can be found on:
 *
-* https://wolles-elektronikkiste.de/ (German)
-* https://wolles-elektronikkiste.de/en/ (English)
+* https://wolles-elektronikkiste.de/icm-20948-9-achsensensor-teil-i (German)
+* https://wolles-elektronikkiste.de/en/icm-20948-9-axis-sensor-part-i (English)
 * 
 ***************************************************************************/
 
