@@ -8,10 +8,10 @@
 * data. I don't know why. Even more strangely, the sample rate divider of the accelerometer
 * works in this sketch, although it shouldn't work when the DLPF is off. 
 * 
-* Further information can be found soon on:
+* Further information can be found on:
 *
-* https://wolles-elektronikkiste.de/ (German)
-* https://wolles-elektronikkiste.de/en/ (English)
+* https://wolles-elektronikkiste.de/icm-20948-9-achsensensor-teil-i (German)
+* https://wolles-elektronikkiste.de/en/icm-20948-9-axis-sensor-part-i (English)
 * 
 ***************************************************************************/
 
