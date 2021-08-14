@@ -5,10 +5,10 @@
 * INT pin, you have to request the interrupt status. Please note that the FSYNC pin
 * has to be pulled up or down.
 *   
-* Further information can be found soon on:
+* Further information can be found on:
 *
-* https://wolles-elektronikkiste.de/ (German)
-* https://wolles-elektronikkiste.de/en/ (English)
+* https://wolles-elektronikkiste.de/icm-20948-9-achsensensor-teil-i (German)
+* https://wolles-elektronikkiste.de/en/icm-20948-9-axis-sensor-part-i (English)
 * 
 ***************************************************************************/
 
