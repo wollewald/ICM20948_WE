@@ -811,7 +811,7 @@ uint8_t ICM20948_WE::readRegister8(uint8_t bank, uint8_t reg){
     uint8_t regValue = 0;
     _wire->beginTransmission(i2cAddress);
     _wire->write(reg);
-    _wire->endTransmission();
+    _wire->endTransmission(false);
     _wire->requestFrom(i2cAddress,1);
     if(_wire->available()){
         regValue = _wire->read();
@@ -825,7 +825,7 @@ int16_t ICM20948_WE::readRegister16(uint8_t bank, uint8_t reg){
     int16_t reg16Val = 0;
     _wire->beginTransmission(i2cAddress);
     _wire->write(reg);
-    _wire->endTransmission();
+    _wire->endTransmission(false);
     _wire->requestFrom(i2cAddress,2);
     if(_wire->available()){
         MSByte = _wire->read();
@@ -839,7 +839,7 @@ void ICM20948_WE::readAllData(uint8_t* data){
     switchBank(0);
     _wire->beginTransmission(i2cAddress);
     _wire->write(ICM20948_ACCEL_OUT);
-    _wire->endTransmission();
+    _wire->endTransmission(false);
     _wire->requestFrom(i2cAddress,20);
     if(_wire->available()){
         for(int i=0; i<20; i++){
