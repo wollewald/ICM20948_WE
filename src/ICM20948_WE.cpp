@@ -849,17 +849,24 @@ void ICM20948_WE::readAllData(uint8_t* data){
 }
 
 xyzFloat ICM20948_WE::readICM20948xyzValFromFifo(){
-    uint8_t MSByte = 0, LSByte = 0;
+    uint8_t fifoTriple[6];
     xyzFloat xyzResult = {0.0, 0.0, 0.0};
-    MSByte = readRegister8(0, ICM20948_FIFO_R_W);
-    LSByte = readRegister8(0, ICM20948_FIFO_R_W);
-    xyzResult.x = ((int16_t)((MSByte<<8) + LSByte)) * 1.0;
-    MSByte = readRegister8(0, ICM20948_FIFO_R_W);
-    LSByte = readRegister8(0, ICM20948_FIFO_R_W);
-    xyzResult.y = ((int16_t)((MSByte<<8) + LSByte)) * 1.0;
-    MSByte = readRegister8(0, ICM20948_FIFO_R_W);
-    LSByte = readRegister8(0, ICM20948_FIFO_R_W);
-    xyzResult.z = ((int16_t)((MSByte<<8) + LSByte)) * 1.0;
+    switchBank(0);
+    
+    _wire->beginTransmission(i2cAddress);
+    _wire->write(ICM20948_FIFO_R_W);
+    _wire->endTransmission(false);
+    _wire->requestFrom(i2cAddress,6);
+    if(_wire->available()){
+        for(int i=0; i<6; i++){
+            fifoTriple[i] = _wire->read();
+        }
+    }
+    
+    xyzResult.x = ((int16_t)((fifoTriple[0]<<8) + fifoTriple[1])) * 1.0;
+    xyzResult.y = ((int16_t)((fifoTriple[2]<<8) + fifoTriple[3])) * 1.0;
+    xyzResult.z = ((int16_t)((fifoTriple[4]<<8) + fifoTriple[5])) * 1.0;
+    
     return xyzResult; 
 }
 
