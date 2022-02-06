@@ -1,5 +1,5 @@
 # ICM20948_WE
-An Arduino library for the ICM-20948 9-axis accelerometer, gyroscope and magnetometer. It contains many example sketches with lots of comments to make it easy to use.
+An Arduino library for the ICM-20948 9-axis accelerometer, gyroscope and magnetometer. It contains many example sketches with lots of comments to make it easy to use. It works with I2C and SPI.
 
 I have not implemented DMP features and most probably I won't do that in future. That would exceed the time I can invest. 
 
