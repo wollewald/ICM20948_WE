@@ -22,7 +22,8 @@
  * ICM20948_WE myIMU = ICM20948_WE(ICM20948_ADDR) -> uses Wire / ICM20948_ADDR
  * ICM20948_WE myIMU = ICM20948_WE(&wire2)        -> uses the TwoWire object wire2 / ICM20948_ADDR
  * ICM20948_WE myIMU = ICM20948_WE(&wire2, ICM20948_ADDR) -> all together
- * Successfully tested with two I2C busses on an ESP32
+ * ICM20948_WE myIMU = ICM20948_WE(CS_PIN, spi);  -> uses SPI, spi is just a flag, see SPI example
+ * ICM20948_WE myIMU = ICM20948_WE(&SPI, CS_PIN, spi);  -> uses SPI / passes the SPI object, spi is just a flag, see SPI example
  */
 ICM20948_WE myIMU = ICM20948_WE(ICM20948_ADDR);
 
