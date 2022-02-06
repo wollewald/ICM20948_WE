@@ -22,34 +22,60 @@
 /************  Constructors ************/
 
 ICM20948_WE::ICM20948_WE(int addr){
+    useSPI = false;
     _wire = &Wire;
     i2cAddress = addr;   
 }
 
 ICM20948_WE::ICM20948_WE(){
+    useSPI = false;
     _wire = &Wire;
     i2cAddress = 0x68;   
 }
 
 ICM20948_WE::ICM20948_WE(TwoWire *w, int addr){
+    useSPI = false;
     _wire = w;
     i2cAddress = addr; 
 }
 
 ICM20948_WE::ICM20948_WE(TwoWire *w){
+    useSPI = false;
     _wire = w;
     i2cAddress = 0x68;
 }
 
+ICM20948_WE::ICM20948_WE(SPIClass *s, int cs, bool spi){
+    useSPI = spi;
+    _spi = s;
+    csPin = cs;  
+}
+
+ICM20948_WE::ICM20948_WE(int cs, bool spi){
+    useSPI = spi;
+    _spi = &SPI;
+    csPin = cs;
+}
+
+
 /************ Basic Settings ************/
     
 
-bool ICM20948_WE::init(){ 
+bool ICM20948_WE::init(){
+    if(useSPI){
+        pinMode(csPin, OUTPUT);
+        digitalWrite(csPin, HIGH);
+        _spi->begin();
+       // _spi->setDataMode(SPI_MODE0);
+        
+    }   
     currentBank = 0;
-    if(!reset_ICM20948()){
+    
+    reset_ICM20948();
+    if(whoAmI() != ICM20948_WHO_AM_I_CONTENT){
         return false;
     }
-   
+    
     accOffsetVal.x = 0.0;
     accOffsetVal.y = 0.0;
     accOffsetVal.z = 0.0;
@@ -62,7 +88,7 @@ bool ICM20948_WE::init(){
     gyrOffsetVal.z = 0.0;
     gyrRangeFactor = 1.0;
     fifoType = ICM20948_FIFO_ACC;
-    
+        
     sleep(false);
     writeRegister8(2, ICM20948_ODR_ALIGN_EN, 1); // aligns ODR 
     
@@ -74,7 +100,7 @@ void ICM20948_WE::autoOffsets(){
     accOffsetVal.x = 0.0;
     accOffsetVal.y = 0.0;
     accOffsetVal.z = 0.0;
-    
+        
     setGyrDLPF(ICM20948_DLPF_6); // lowest noise
     setGyrRange(ICM20948_GYRO_RANGE_250); // highest resolution
     setAccRange(ICM20948_ACC_RANGE_2G);
@@ -224,7 +250,7 @@ void ICM20948_WE::readSensor(){
 xyzFloat ICM20948_WE::getAccRawValues(){
     xyzFloat accRawVal;
     accRawVal.x = (int16_t)(((buffer[0]) << 8) | buffer[1]) * 1.0;
-    accRawVal.y = (int16_t)(((buffer[2]) << 8) | (int16_t)buffer[3]) * 1.0;
+    accRawVal.y = (int16_t)(((buffer[2]) << 8) | buffer[3]) * 1.0;
     accRawVal.z = (int16_t)(((buffer[4]) << 8) | buffer[5]) * 1.0;
     return accRawVal;
 }
@@ -692,7 +718,7 @@ int16_t ICM20948_WE::getNumberOfFifoDataSets(){
 }
 
 void ICM20948_WE::findFifoBegin(){
-    int16_t count = getFifoCount();
+    uint16_t count = getFifoCount();
     int16_t start = 0;
         
     if((fifoType == ICM20948_FIFO_ACC) || (fifoType == ICM20948_FIFO_GYR)){
@@ -718,13 +744,14 @@ bool ICM20948_WE::initMagnetometer(){
     reset_ICM20948();
     sleep(false);
     writeRegister8(2, ICM20948_ODR_ALIGN_EN, 1); // aligns ODR 
+    delay(10);
     enableI2CMaster();
+    delay(10);
     
-    
-    if(!(whoAmIMag() == AK09916_WHO_AM_I)){
+    int16_t whoAmI = whoAmIMag();
+    if(! ((whoAmI == AK09916_WHO_AM_I_1) || (whoAmI == AK09916_WHO_AM_I_2))){
         return false;
     }
-    
     setMagOpMode(AK09916_CONT_MODE_100HZ); 
    
     return true;
@@ -778,43 +805,77 @@ xyzFloat ICM20948_WE::correctGyrRawValues(xyzFloat gyrRawVal){
 void ICM20948_WE::switchBank(uint8_t newBank){
     if(newBank != currentBank){
         currentBank = newBank;
-        _wire->beginTransmission(i2cAddress);
-        _wire->write(ICM20948_REG_BANK_SEL);
-        _wire->write(currentBank<<4);
-        _wire->endTransmission();
+        if(!useSPI){
+            _wire->beginTransmission(i2cAddress);
+            _wire->write(ICM20948_REG_BANK_SEL);
+            _wire->write(currentBank<<4);
+            _wire->endTransmission();
+        }
+        else{
+            digitalWrite(csPin, LOW);
+            _spi->transfer(ICM20948_REG_BANK_SEL); 
+            _spi->transfer(currentBank<<4);
+            digitalWrite(csPin, HIGH);
+        }
     }
 }
 
-uint8_t ICM20948_WE::writeRegister8(uint8_t bank, uint8_t reg, uint8_t val){
+void ICM20948_WE::writeRegister8(uint8_t bank, uint8_t reg, uint8_t val){
     switchBank(bank);
-    _wire->beginTransmission(i2cAddress);
-    _wire->write(reg);
-    _wire->write(val);
-    
-    return _wire->endTransmission();
+        
+    if(!useSPI){
+        _wire->beginTransmission(i2cAddress);
+        _wire->write(reg);
+        _wire->write(val);
+        _wire->endTransmission();
+    }
+    else{
+        digitalWrite(csPin, LOW);
+        _spi->transfer(reg); 
+        _spi->transfer(val);
+        digitalWrite(csPin, HIGH);
+    }
 }
 
-uint8_t ICM20948_WE::writeRegister16(uint8_t bank, uint8_t reg, int16_t val){
+void ICM20948_WE::writeRegister16(uint8_t bank, uint8_t reg, int16_t val){
     switchBank(bank);
     int8_t MSByte = (int8_t)((val>>8) & 0xFF);
     uint8_t LSByte = val & 0xFF;
-    _wire->beginTransmission(i2cAddress);
-    _wire->write(reg);
-    _wire->write(MSByte);
-    _wire->write(LSByte);
-    
-    return _wire->endTransmission();  
+        
+    if(!useSPI){
+        _wire->beginTransmission(i2cAddress);
+        _wire->write(reg);
+        _wire->write(MSByte);
+        _wire->write(LSByte);
+        _wire->endTransmission();
+    }
+    else{
+        digitalWrite(csPin, LOW);
+        _spi->transfer(reg); 
+        _spi->transfer(val);
+        digitalWrite(csPin, HIGH);
+    }
 }
 
 uint8_t ICM20948_WE::readRegister8(uint8_t bank, uint8_t reg){
     switchBank(bank);
     uint8_t regValue = 0;
-    _wire->beginTransmission(i2cAddress);
-    _wire->write(reg);
-    _wire->endTransmission(false);
-    _wire->requestFrom(i2cAddress,1);
-    if(_wire->available()){
-        regValue = _wire->read();
+    
+    if(!useSPI){
+        _wire->beginTransmission(i2cAddress);
+        _wire->write(reg);
+        _wire->endTransmission(false);
+        _wire->requestFrom(i2cAddress,1);
+        if(_wire->available()){
+            regValue = _wire->read();
+        }
+    }
+    else{
+        reg |= 0x80;
+        digitalWrite(csPin, LOW);
+        _spi->transfer(reg); 
+        regValue = _spi->transfer(0x00);
+        digitalWrite(csPin, HIGH);
     }
     return regValue;
 }
@@ -823,13 +884,24 @@ int16_t ICM20948_WE::readRegister16(uint8_t bank, uint8_t reg){
     switchBank(bank);
     uint8_t MSByte = 0, LSByte = 0;
     int16_t reg16Val = 0;
-    _wire->beginTransmission(i2cAddress);
-    _wire->write(reg);
-    _wire->endTransmission(false);
-    _wire->requestFrom(i2cAddress,2);
-    if(_wire->available()){
-        MSByte = _wire->read();
-        LSByte = _wire->read();
+    
+    if(!useSPI){
+        _wire->beginTransmission(i2cAddress);
+        _wire->write(reg);
+        _wire->endTransmission(false);
+        _wire->requestFrom(i2cAddress,2);
+        if(_wire->available()){
+            MSByte = _wire->read();
+            LSByte = _wire->read();
+        }
+    }
+    else{
+        reg = reg | 0x80;
+        digitalWrite(csPin, LOW);
+        _spi->transfer(reg); 
+        MSByte = _spi->transfer(0x00);
+        LSByte = _spi->transfer(0x00);
+        digitalWrite(csPin, HIGH);
     }
     reg16Val = (MSByte<<8) + LSByte;
     return reg16Val;
@@ -837,14 +909,26 @@ int16_t ICM20948_WE::readRegister16(uint8_t bank, uint8_t reg){
 
 void ICM20948_WE::readAllData(uint8_t* data){    
     switchBank(0);
-    _wire->beginTransmission(i2cAddress);
-    _wire->write(ICM20948_ACCEL_OUT);
-    _wire->endTransmission(false);
-    _wire->requestFrom(i2cAddress,20);
-    if(_wire->available()){
-        for(int i=0; i<20; i++){
-            data[i] = _wire->read();
+    
+    if(!useSPI){
+        _wire->beginTransmission(i2cAddress);
+        _wire->write(ICM20948_ACCEL_OUT);
+        _wire->endTransmission(false);
+        _wire->requestFrom(i2cAddress,20);
+        if(_wire->available()){
+            for(int i=0; i<20; i++){
+                data[i] = _wire->read();
+            }
         }
+    }
+    else{
+        uint8_t reg = ICM20948_ACCEL_OUT | 0x80;
+        digitalWrite(csPin, LOW);
+        _spi->transfer(reg);
+        for(int i=0; i<20; i++){
+                data[i] = _spi->transfer(0x00);
+        }
+        digitalWrite(csPin, HIGH);
     }
 }
 
@@ -852,15 +936,26 @@ xyzFloat ICM20948_WE::readICM20948xyzValFromFifo(){
     uint8_t fifoTriple[6];
     xyzFloat xyzResult = {0.0, 0.0, 0.0};
     switchBank(0);
-    
-    _wire->beginTransmission(i2cAddress);
-    _wire->write(ICM20948_FIFO_R_W);
-    _wire->endTransmission(false);
-    _wire->requestFrom(i2cAddress,6);
-    if(_wire->available()){
-        for(int i=0; i<6; i++){
-            fifoTriple[i] = _wire->read();
+   
+    if(!useSPI){
+        _wire->beginTransmission(i2cAddress);
+        _wire->write(ICM20948_FIFO_R_W);
+        _wire->endTransmission(false);
+        _wire->requestFrom(i2cAddress,6);
+        if(_wire->available()){
+            for(int i=0; i<6; i++){
+                fifoTriple[i] = _wire->read();
+            }
         }
+    }
+    else{
+        uint8_t reg = ICM20948_FIFO_R_W | 0x80;
+        digitalWrite(csPin, LOW);
+        _spi->transfer(reg);
+        for(int i=0; i<6; i++){
+                fifoTriple[i] = _spi->transfer(0x00);
+        }
+        digitalWrite(csPin, HIGH);
     }
     
     xyzResult.x = ((int16_t)((fifoTriple[0]<<8) + fifoTriple[1])) * 1.0;
@@ -892,10 +987,9 @@ int16_t ICM20948_WE::readAK09916Register16(uint8_t reg){
     return regValue;
 }
 
-uint8_t ICM20948_WE::reset_ICM20948(){
-    uint8_t ack = writeRegister8(0, ICM20948_PWR_MGMT_1, ICM20948_RESET);
+void ICM20948_WE::reset_ICM20948(){
+    writeRegister8(0, ICM20948_PWR_MGMT_1, ICM20948_RESET);
     delay(10);  // wait for registers to reset
-    return (ack == 0);
 }
 
 void ICM20948_WE::enableI2CMaster(){

@@ -29,6 +29,7 @@
 #endif
 
 #include <Wire.h>
+#include <SPI.h>
 
 #define AK09916_ADDRESS 0x0C
 
@@ -146,7 +147,9 @@
 #define AK09916_READ                0x80
 
 /* Others */
-#define AK09916_WHO_AM_I            0x4809
+#define AK09916_WHO_AM_I_1          0x4809
+#define AK09916_WHO_AM_I_2          0x0948
+#define ICM20948_WHO_AM_I_CONTENT   0xEA
 #define ICM20948_ROOM_TEMP_OFFSET   0.0f
 #define ICM20948_T_SENSITIVITY      333.87f
 #define AK09916_MAG_LSB             0.1495f
@@ -241,7 +244,9 @@ public:
     ICM20948_WE(int addr);
     ICM20948_WE();
     ICM20948_WE(TwoWire *w, int addr);
-    ICM20948_WE(TwoWire *w);           
+    ICM20948_WE(TwoWire *w);
+    ICM20948_WE(SPIClass *s, int cs, bool spi);
+    ICM20948_WE(int cs, bool spi);  
     
    
    /* Basic settings */
@@ -333,6 +338,7 @@ public:
     
 private:
     TwoWire *_wire;
+    SPIClass *_spi;
     int i2cAddress;
     uint8_t currentBank;
     uint8_t buffer[20]; 
@@ -343,13 +349,14 @@ private:
     uint8_t gyrRangeFactor;
     uint8_t regVal;   // intermediate storage of register values
     ICM20948_fifoType fifoType;
-    
+    int16_t csPin;
+    bool useSPI;
     void setClockToAutoSelect();
     xyzFloat correctAccRawValues(xyzFloat accRawVal);
     xyzFloat correctGyrRawValues(xyzFloat gyrRawVal);
     void switchBank(uint8_t newBank);
-    uint8_t writeRegister8(uint8_t bank, uint8_t reg, uint8_t val);
-    uint8_t writeRegister16(uint8_t bank, uint8_t reg, int16_t val);
+    void writeRegister8(uint8_t bank, uint8_t reg, uint8_t val);
+    void writeRegister16(uint8_t bank, uint8_t reg, int16_t val);
     uint8_t readRegister8(uint8_t bank, uint8_t reg);
     int16_t readRegister16(uint8_t bank, uint8_t reg);
     void readAllData(uint8_t* data);
@@ -357,7 +364,7 @@ private:
     void writeAK09916Register8(uint8_t reg, uint8_t val);
     uint8_t readAK09916Register8(uint8_t reg);
     int16_t readAK09916Register16(uint8_t reg);
-    uint8_t reset_ICM20948();
+    void reset_ICM20948();
     void enableI2CMaster();
     void enableMagDataRead(uint8_t reg, uint8_t bytes);
 
