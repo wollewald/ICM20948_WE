@@ -266,7 +266,7 @@ public:
     void setGyrSampleRateDivider(uint8_t gyrSplRateDiv);
     void setTempDLPF(ICM20948_dlpf dlpf);
     void setI2CMstSampleRate(uint8_t rateExp);
-        
+    void setSPIClockSpeed(unsigned long clock);   
             
     /* x,y,z results */
     
@@ -339,6 +339,7 @@ public:
 private:
     TwoWire *_wire;
     SPIClass *_spi;
+    SPISettings mySPISettings;
     int i2cAddress;
     uint8_t currentBank;
     uint8_t buffer[20]; 

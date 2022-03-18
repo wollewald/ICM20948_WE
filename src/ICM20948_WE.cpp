@@ -66,7 +66,7 @@ bool ICM20948_WE::init(){
         pinMode(csPin, OUTPUT);
         digitalWrite(csPin, HIGH);
         _spi->begin();
-       // _spi->setDataMode(SPI_MODE0);
+        mySPISettings = SPISettings(8000000, MSBFIRST, SPI_MODE0); 
         
     }   
     currentBank = 0;
@@ -239,6 +239,10 @@ void ICM20948_WE::setI2CMstSampleRate(uint8_t rateExp){
     if(rateExp < 16){
         writeRegister8(3, ICM20948_I2C_MST_ODR_CFG, rateExp);
     }
+}
+
+void ICM20948_WE::setSPIClockSpeed(unsigned long clock){
+    mySPISettings = SPISettings(clock, MSBFIRST, SPI_MODE0);
 }
     
 /************* x,y,z results *************/
@@ -774,7 +778,6 @@ void ICM20948_WE::resetMag(){
     delay(100);
 }
 
-
 /************************************************ 
      Private Functions
 *************************************************/
@@ -812,10 +815,12 @@ void ICM20948_WE::switchBank(uint8_t newBank){
             _wire->endTransmission();
         }
         else{
+            _spi->beginTransaction(mySPISettings);
             digitalWrite(csPin, LOW);
             _spi->transfer(ICM20948_REG_BANK_SEL); 
             _spi->transfer(currentBank<<4);
             digitalWrite(csPin, HIGH);
+            _spi->endTransaction();
         }
     }
 }
@@ -830,10 +835,12 @@ void ICM20948_WE::writeRegister8(uint8_t bank, uint8_t reg, uint8_t val){
         _wire->endTransmission();
     }
     else{
+        _spi->beginTransaction(mySPISettings);
         digitalWrite(csPin, LOW);
         _spi->transfer(reg); 
         _spi->transfer(val);
         digitalWrite(csPin, HIGH);
+        _spi->endTransaction();
     }
 }
 
@@ -850,10 +857,12 @@ void ICM20948_WE::writeRegister16(uint8_t bank, uint8_t reg, int16_t val){
         _wire->endTransmission();
     }
     else{
+        _spi->beginTransaction(mySPISettings);
         digitalWrite(csPin, LOW);
         _spi->transfer(reg); 
         _spi->transfer(val);
         digitalWrite(csPin, HIGH);
+        _spi->endTransaction();
     }
 }
 
@@ -872,10 +881,12 @@ uint8_t ICM20948_WE::readRegister8(uint8_t bank, uint8_t reg){
     }
     else{
         reg |= 0x80;
+        _spi->beginTransaction(mySPISettings);
         digitalWrite(csPin, LOW);
         _spi->transfer(reg); 
         regValue = _spi->transfer(0x00);
         digitalWrite(csPin, HIGH);
+        _spi->endTransaction();
     }
     return regValue;
 }
@@ -897,11 +908,13 @@ int16_t ICM20948_WE::readRegister16(uint8_t bank, uint8_t reg){
     }
     else{
         reg = reg | 0x80;
+        _spi->beginTransaction(mySPISettings);
         digitalWrite(csPin, LOW);
         _spi->transfer(reg); 
         MSByte = _spi->transfer(0x00);
         LSByte = _spi->transfer(0x00);
         digitalWrite(csPin, HIGH);
+        _spi->endTransaction();
     }
     reg16Val = (MSByte<<8) + LSByte;
     return reg16Val;
@@ -923,12 +936,14 @@ void ICM20948_WE::readAllData(uint8_t* data){
     }
     else{
         uint8_t reg = ICM20948_ACCEL_OUT | 0x80;
+        _spi->beginTransaction(mySPISettings);
         digitalWrite(csPin, LOW);
         _spi->transfer(reg);
         for(int i=0; i<20; i++){
                 data[i] = _spi->transfer(0x00);
         }
         digitalWrite(csPin, HIGH);
+        _spi->endTransaction();
     }
 }
 
@@ -950,12 +965,14 @@ xyzFloat ICM20948_WE::readICM20948xyzValFromFifo(){
     }
     else{
         uint8_t reg = ICM20948_FIFO_R_W | 0x80;
+        _spi->beginTransaction(mySPISettings);
         digitalWrite(csPin, LOW);
         _spi->transfer(reg);
         for(int i=0; i<6; i++){
                 fifoTriple[i] = _spi->transfer(0x00);
         }
         digitalWrite(csPin, HIGH);
+        _spi->endTransaction();
     }
     
     xyzResult.x = ((int16_t)((fifoTriple[0]<<8) + fifoTriple[1])) * 1.0;
