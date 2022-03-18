@@ -45,6 +45,7 @@ setGyrDLPF	KEYWORD2
 setGyrSampleRateDivider	KEYWORD2
 setTempDLPF	KEYWORD2
 setI2CMstSampleRate	KEYWORD2
+setSPIClockSpeed	KEYWORD2
 readSensor	KEYWORD2
 getAccRawValues	KEYWORD2
 getCorrectedAccRawValues	KEYWORD2
