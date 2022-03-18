@@ -46,8 +46,11 @@ void setup() {
   }
 
   
-/******************* Basic Settings ******************/ 
-  
+/******************* Basic Settings ******************/
+
+  /* You can set the SPI clock speed. The default is 8 MHz. */ 
+  myIMU.setSPIClockSpeed(8000000);
+ 
   /*  This is a method to calibrate. You have to determine the minimum and maximum 
    *  raw acceleration values of the axes determined in the range +/- 2 g. 
    *  You call the function as follows: setAccOffsets(xMin,xMax,yMin,yMax,zMin,zMax);
