@@ -25,7 +25,7 @@ bool spi = true;
  * ICM20948_WE myIMU = ICM20948_WE(&SPI, CS_PIN, spi);  -> uses SPI / passes the SPI object, spi is just a flag, see SPI example
  * Successfully tested with two I2C busses on an ESP32
  */
-// ICM20948_WE myIMU = ICM20948_WE(CS_PIN, spi);
+ ICM20948_WE myIMU = ICM20948_WE(CS_PIN, spi);
 
 void setup() {
   Serial.begin(115200);
@@ -49,7 +49,7 @@ void setup() {
 /******************* Basic Settings ******************/
 
   /* You can set the SPI clock speed. The default is 8 MHz. */ 
-  myIMU.setSPIClockSpeed(8000000);
+  // myIMU.setSPIClockSpeed(8000000);
  
   /*  This is a method to calibrate. You have to determine the minimum and maximum 
    *  raw acceleration values of the axes determined in the range +/- 2 g. 
