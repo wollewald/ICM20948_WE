@@ -66,8 +66,7 @@ bool ICM20948_WE::init(){
         pinMode(csPin, OUTPUT);
         digitalWrite(csPin, HIGH);
         _spi->begin();
-        mySPISettings = SPISettings(8000000, MSBFIRST, SPI_MODE0); 
-        
+        mySPISettings = SPISettings(8000000, MSBFIRST, SPI_MODE0);      
     }   
     currentBank = 0;
     
