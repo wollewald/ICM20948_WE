@@ -4,9 +4,6 @@
 * This sketch shows how to use the cycle mode. Enable/Disable the gyrosocope and
 * accelerometer and play with the sample rates to see how the update frequency of the
 * displayed measured values change. 
-* Note: strangely, if you apply the DLPF mode to the accelerometer, you will get wrong
-* data. I don't know why. Even more strangely, the sample rate divider of the accelerometer
-* works in this sketch, although it shouldn't work when the DLPF is off. 
 * 
 * Further information can be found on:
 *
@@ -90,7 +87,9 @@ void setup() {
   myIMU.setAccRange(ICM20948_ACC_RANGE_2G);
   
   /*  Choose a level for the Digital Low Pass Filter or switch it off.  
-   *  ICM20948_DLPF_0, ICM20948_DLPF_2, ...... ICM20948_DLPF_7, ICM20948_DLPF_OFF 
+   *  ICM20948_DLPF_0, ICM20948_DLPF_2, ...... ICM20948_DLPF_7, ICM20948_DLPF_OFF
+   *  
+   *  IMPORTANT: This needs to be ICM20948_DLPF_7 if DLPF is used in cycle mode!
    *  
    *  DLPF       3dB Bandwidth [Hz]      Output Rate [Hz]
    *    0              246.0               1125/(1+ASRD) 
@@ -106,7 +105,7 @@ void setup() {
    *    ASRD = Accelerometer Sample Rate Divider (0...4095)
    *    You achieve lowest noise using level 6  
    */
-  myIMU.setAccDLPF(ICM20948_DLPF_OFF);    
+  myIMU.setAccDLPF(ICM20948_DLPF_7);    
   
   /*  Acceleration sample rate divider divides the output rate of the accelerometer.
    *  Sample rate = Basic sample rate / (1 + divider) 
@@ -156,8 +155,7 @@ void setup() {
   myIMU.setGyrSampleRateDivider(255);
 
   /* In cycle mode the sensors wake up in the frequency of sample rate. You can define 
-   * which sensors shall work in cycle mode. Note: Cycle for acceleration in combination with 
-   * DLPF led to strange effects in my experiments. 
+   * which sensors shall work in cycle mode. 
    * 
    *  ICM20948_NO_CYCLE          
    *  ICM20948_GYR_CYCLE           
@@ -170,22 +168,22 @@ void setup() {
   /* The Low Power Mode does not work if DLPF is enabled */
   //myIMU.enableLowPower(true);
     
-  /* In cycle mode you can set the number of measured values for the gyroscope 
+  /* In cycle mode you need to set the number of measured values for the gyroscope 
    * to be averaged. You can select 1,2,4,8,16,32,64 or 128: 
    * ICM20948_GYR_AVG_1, ICM20948_GYR_AVG_2, ..... , ICM20948_GYR_AVG_128 
    * The on-time for measurements increases with the number of samples to be averaged:
    * 1 -> 1.15 ms, 2 -> 1.59 ms, .... , 128 -> 57.59 ms (see data sheet)
    */
-  //myIMU.setGyrAverageInCycleMode(ICM20948_GYR_AVG_128);
+  myIMU.setGyrAverageInCycleMode(ICM20948_GYR_AVG_1);
 
-  /* In cycle mode you can set the number of measured values for the accelerometer 
+  /* In cycle mode you need to set the number of measured values for the accelerometer 
    * to be averaged. You can select 4,8,16,32: 
    * ICM20948_ACC_AVG_4, ICM20948_ACC_AVG_8, ICM20948_ACC_AVG_16, ICM20948_ACC_AVG_32 
    * The on-time for measurements increases with the number of samples to be averaged:
    * 4 -> 1.488 ms, 8 -> 2.377 ms, 16 -> 4.154 ms , 32 -> 7.71 ms (see data sheet)
    * If DLPF is OFF, then with ICM20948_ACC_AVG_4 only one sample is taken!
    */
-  //myIMU.setAccAverageInCycleMode(ICM20948_ACC_AVG_32);
+  myIMU.setAccAverageInCycleMode(ICM20948_ACC_AVG_4);
 
   /* setI2CMstSampleRate sets the rate of the devices controlled by the I2C master,
    * i.e. the magnetometer. It is not the internal sample rate of the magnetometer, but

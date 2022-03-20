@@ -71,6 +71,8 @@ void setup() {
   /*  Choose a level for the Digital Low Pass Filter or switch it off.  
    *  ICM20948_DLPF_0, ICM20948_DLPF_2, ...... ICM20948_DLPF_7, ICM20948_DLPF_OFF 
    *  
+   *  IMPORTANT: This needs to be ICM20948_DLPF_7 if DLPF is used in cycle mode!
+   *  
    *  DLPF       3dB Bandwidth [Hz]      Output Rate [Hz]
    *    0              246.0               1125/(1+ASRD) 
    *    1              246.0               1125/(1+ASRD)
