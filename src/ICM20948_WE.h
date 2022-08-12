@@ -30,6 +30,8 @@
 
 #include <Wire.h>
 #include <SPI.h>
+#include "xyzFloat.h"
+
 
 #define AK09916_ADDRESS 0x0C
 
@@ -227,13 +229,6 @@ typedef enum AK09916_OP_MODE {
 typedef enum ICM20948_ORIENTATION {
   ICM20948_FLAT, ICM20948_FLAT_1, ICM20948_XY, ICM20948_XY_1, ICM20948_YX, ICM20948_YX_1
 } ICM20948_orientation;
-
-struct xyzFloat {
-    float x;
-    float y;
-    float z;
-};
-
 
 class ICM20948_WE
 {
