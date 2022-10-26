@@ -32,133 +32,7 @@
 #include <SPI.h>
 #include "xyzFloat.h"
 
-
-#define AK09916_ADDRESS 0x0C
-
-/* Registers ICM20948 USER BANK 0*/
-#define ICM20948_WHO_AM_I            0x00
-#define ICM20948_USER_CTRL           0x03
-#define ICM20948_LP_CONFIG           0x05
-#define ICM20948_PWR_MGMT_1          0x06
-#define ICM20948_PWR_MGMT_2          0x07
-#define ICM20948_INT_PIN_CFG         0x0F
-#define ICM20948_INT_ENABLE          0x10
-#define ICM20948_INT_ENABLE_1        0x11
-#define ICM20948_INT_ENABLE_2        0x12
-#define ICM20948_INT_ENABLE_3        0x13
-#define ICM20948_I2C_MST_STATUS      0x17
-#define ICM20948_INT_STATUS          0x19
-#define ICM20948_INT_STATUS_1        0x1A
-#define ICM20948_INT_STATUS_2        0x1B
-#define ICM20948_INT_STATUS_3        0x1C
-#define ICM20948_DELAY_TIME_H        0x28
-#define ICM20948_DELAY_TIME_L        0x29
-#define ICM20948_ACCEL_OUT           0x2D // accel data registers begin
-#define ICM20948_GYRO_OUT            0x33 // gyro data registers begin
-#define ICM20948_TEMP_OUT            0x39 
-#define ICM20948_EXT_SLV_SENS_DATA_00  0x3B
-#define ICM20948_EXT_SLV_SENS_DATA_01  0x3C
-#define ICM20948_FIFO_EN_1           0x66
-#define ICM20948_FIFO_EN_2           0x67
-#define ICM20948_FIFO_RST            0x68
-#define ICM20948_FIFO_MODE           0x69
-#define ICM20948_FIFO_COUNT          0x70
-#define ICM20948_FIFO_R_W            0x72
-#define ICM20948_DATA_RDY_STATUS     0x74
-#define ICM20948_FIFO_CFG            0x76
-
-/* Registers ICM20948 USER BANK 1*/
-#define ICM20948_SELF_TEST_X_GYRO    0x02
-#define ICM20948_SELF_TEST_Y_GYRO    0x03
-#define ICM20948_SELF_TEST_Z_GYRO    0x04
-#define ICM20948_SELF_TEST_X_ACCEL   0x0E
-#define ICM20948_SELF_TEST_Y_ACCEL   0x0F
-#define ICM20948_SELF_TEST_Z_ACCEL   0x10
-#define ICM20948_XA_OFFS_H           0x14
-#define ICM20948_XA_OFFS_L           0x15
-#define ICM20948_YA_OFFS_H           0x17
-#define ICM20948_YA_OFFS_L           0x18
-#define ICM20948_ZA_OFFS_H           0x1A
-#define ICM20948_ZA_OFFS_L           0x1B
-#define ICM20948_TIMEBASE_CORR_PLL   0x28
-
-/* Registers ICM20948 USER BANK 2*/
-#define ICM20948_GYRO_SMPLRT_DIV     0x00
-#define ICM20948_GYRO_CONFIG_1       0x01
-#define ICM20948_GYRO_CONFIG_2       0x02
-#define ICM20948_XG_OFFS_USRH        0x03
-#define ICM20948_XG_OFFS_USRL        0x04
-#define ICM20948_YG_OFFS_USRH        0x05
-#define ICM20948_YG_OFFS_USRL        0x06
-#define ICM20948_ZG_OFFS_USRH        0x07
-#define ICM20948_ZG_OFFS_USRL        0x08
-#define ICM20948_ODR_ALIGN_EN        0x09
-#define ICM20948_ACCEL_SMPLRT_DIV_1  0x10
-#define ICM20948_ACCEL_SMPLRT_DIV_2  0x11
-#define ICM20948_ACCEL_INTEL_CTRL    0x12
-#define ICM20948_ACCEL_WOM_THR       0x13
-#define ICM20948_ACCEL_CONFIG        0x14
-#define ICM20948_ACCEL_CONFIG_2      0x15
-#define ICM20948_FSYNC_CONFIG        0x52
-#define ICM20948_TEMP_CONFIG         0x53
-#define ICM20948_MOD_CTRL_USR        0x54
-
-/* Registers ICM20948 USER BANK 3*/
-#define ICM20948_I2C_MST_ODR_CFG     0x00
-#define ICM20948_I2C_MST_CTRL        0x01
-#define ICM20948_I2C_MST_DELAY_CTRL  0x02
-#define ICM20948_I2C_SLV0_ADDR       0x03
-#define ICM20948_I2C_SLV0_REG        0x04
-#define ICM20948_I2C_SLV0_CTRL       0x05
-#define ICM20948_I2C_SLV0_DO         0x06
-
-/* Registers ICM20948 ALL BANKS */
-#define ICM20948_REG_BANK_SEL        0x7F
-
-
-/* Registers AK09916 */
-#define AK09916_WIA_1    0x00 // Who I am, Company ID
-#define AK09916_WIA_2    0x01 // Who I am, Device ID
-#define AK09916_STATUS_1 0x10 
-#define AK09916_HXL      0x11
-#define AK09916_HXH      0x12
-#define AK09916_HYL      0x13
-#define AK09916_HYH      0x14
-#define AK09916_HZL      0x15
-#define AK09916_HZH      0x16
-#define AK09916_STATUS_2 0x18
-#define AK09916_CNTL_2   0x31
-#define AK09916_CNTL_3   0x32
-
-/* Register Bits */
-#define ICM20948_RESET              0x80
-#define ICM20948_I2C_MST_EN         0x20
-#define ICM20948_SLEEP              0x40
-#define ICM20948_LP_EN              0x20
-#define ICM20948_BYPASS_EN          0x02
-#define ICM20948_GYR_EN             0x07
-#define ICM20948_ACC_EN             0x38
-#define ICM20948_FIFO_EN            0x40
-#define ICM20948_INT1_ACTL          0x80
-#define ICM20948_INT_1_LATCH_EN     0x20
-#define ICM20948_ACTL_FSYNC         0x08
-#define ICM20948_INT_ANYRD_2CLEAR   0x10
-#define ICM20948_FSYNC_INT_MODE_EN  0x06
-#define AK09916_16_BIT              0x10
-#define AK09916_OVF                 0x08
-#define AK09916_READ                0x80
-
-/* Others */
-#define AK09916_WHO_AM_I_1          0x4809
-#define AK09916_WHO_AM_I_2          0x0948
-#define ICM20948_WHO_AM_I_CONTENT   0xEA
-#define ICM20948_ROOM_TEMP_OFFSET   0.0f
-#define ICM20948_T_SENSITIVITY      333.87f
-#define AK09916_MAG_LSB             0.1495f
-
-
 /* Enums */
-
 
 typedef enum ICM20948_CYCLE {
     ICM20948_NO_CYCLE              = 0x00,
@@ -232,137 +106,259 @@ typedef enum ICM20948_ORIENTATION {
 
 class ICM20948_WE
 {
-public: 
-    
-    /* Constructors */
-    
-    ICM20948_WE(int addr);
-    ICM20948_WE();
-    ICM20948_WE(TwoWire *w, int addr);
-    ICM20948_WE(TwoWire *w);
-    ICM20948_WE(SPIClass *s, int cs, bool spi);
-    ICM20948_WE(int cs, bool spi);  
-    
-   
-   /* Basic settings */
-
-    bool init();
-    void autoOffsets();
-    void setAccOffsets(float xMin, float xMax, float yMin, float yMax, float zMin, float zMax);
-    void setGyrOffsets(float xOffset, float yOffset, float zOffset);    
-    uint8_t whoAmI();
-    void enableAcc(bool enAcc);
-    void setAccRange(ICM20948_accRange accRange);
-    void setAccDLPF(ICM20948_dlpf dlpf); 
-    void setAccSampleRateDivider(uint16_t accSplRateDiv);
-    void enableGyr(bool enGyr);
-    void setGyrRange(ICM20948_gyroRange gyroRange);
-    void setGyrDLPF(ICM20948_dlpf dlpf); 
-    void setGyrSampleRateDivider(uint8_t gyrSplRateDiv);
-    void setTempDLPF(ICM20948_dlpf dlpf);
-    void setI2CMstSampleRate(uint8_t rateExp);
-    void setSPIClockSpeed(unsigned long clock);   
-            
-    /* x,y,z results */
-    
-    void readSensor(); 
-    xyzFloat getAccRawValues();
-    xyzFloat getCorrectedAccRawValues();
-    xyzFloat getGValues();
-    xyzFloat getAccRawValuesFromFifo();
-    xyzFloat getCorrectedAccRawValuesFromFifo();
-    xyzFloat getGValuesFromFifo();
-    float getResultantG(xyzFloat gVal); 
-    float getTemperature();
-    xyzFloat getGyrRawValues();
-    xyzFloat getCorrectedGyrRawValues();
-    xyzFloat getGyrValues(); 
-    xyzFloat getGyrValuesFromFifo();
-    xyzFloat getMagValues();
-    
+    public: 
+        /* constants */
         
-    /* Angles and Orientation */ 
+        static constexpr uint8_t AK09916_ADDRESS              {0x0C};
+
+        /* Registers ICM20948 USER BANK 0*/
+        static constexpr uint8_t ICM20948_WHO_AM_I            {0x00};
+        static constexpr uint8_t ICM20948_USER_CTRL           {0x03};
+        static constexpr uint8_t ICM20948_LP_CONFIG           {0x05};
+        static constexpr uint8_t ICM20948_PWR_MGMT_1          {0x06};
+        static constexpr uint8_t ICM20948_PWR_MGMT_2          {0x07};
+        static constexpr uint8_t ICM20948_INT_PIN_CFG         {0x0F};
+        static constexpr uint8_t ICM20948_INT_ENABLE          {0x10};
+        static constexpr uint8_t ICM20948_INT_ENABLE_1        {0x11};
+        static constexpr uint8_t ICM20948_INT_ENABLE_2        {0x12};
+        static constexpr uint8_t ICM20948_INT_ENABLE_3        {0x13};
+        static constexpr uint8_t ICM20948_I2C_MST_STATUS      {0x17};
+        static constexpr uint8_t ICM20948_INT_STATUS          {0x19};
+        static constexpr uint8_t ICM20948_INT_STATUS_1        {0x1A};
+        static constexpr uint8_t ICM20948_INT_STATUS_2        {0x1B};
+        static constexpr uint8_t ICM20948_INT_STATUS_3        {0x1C};
+        static constexpr uint8_t ICM20948_DELAY_TIME_H        {0x28};
+        static constexpr uint8_t ICM20948_DELAY_TIME_L        {0x29};
+        static constexpr uint8_t ICM20948_ACCEL_OUT           {0x2D}; // accel data registers begin
+        static constexpr uint8_t ICM20948_GYRO_OUT            {0x33}; // gyro data registers begin
+        static constexpr uint8_t ICM20948_TEMP_OUT            {0x39};
+        static constexpr uint8_t ICM20948_EXT_SLV_SENS_DATA_00{0x3B};
+        static constexpr uint8_t ICM20948_EXT_SLV_SENS_DATA_01{0x3C};
+        static constexpr uint8_t ICM20948_FIFO_EN_1           {0x66};
+        static constexpr uint8_t ICM20948_FIFO_EN_2           {0x67};
+        static constexpr uint8_t ICM20948_FIFO_RST            {0x68};
+        static constexpr uint8_t ICM20948_FIFO_MODE           {0x69};
+        static constexpr uint8_t ICM20948_FIFO_COUNT          {0x70};
+        static constexpr uint8_t ICM20948_FIFO_R_W            {0x72};
+        static constexpr uint8_t ICM20948_DATA_RDY_STATUS     {0x74};
+        static constexpr uint8_t ICM20948_FIFO_CFG            {0x76};
+
+        /* Registers ICM20948 USER BANK 1*/
+        static constexpr uint8_t ICM20948_SELF_TEST_X_GYRO    {0x02};
+        static constexpr uint8_t ICM20948_SELF_TEST_Y_GYRO    {0x03};
+        static constexpr uint8_t ICM20948_SELF_TEST_Z_GYRO    {0x04};
+        static constexpr uint8_t ICM20948_SELF_TEST_X_ACCEL   {0x0E};
+        static constexpr uint8_t ICM20948_SELF_TEST_Y_ACCEL   {0x0F};
+        static constexpr uint8_t ICM20948_SELF_TEST_Z_ACCEL   {0x10};
+        static constexpr uint8_t ICM20948_XA_OFFS_H           {0x14};
+        static constexpr uint8_t ICM20948_XA_OFFS_L           {0x15};
+        static constexpr uint8_t ICM20948_YA_OFFS_H           {0x17};
+        static constexpr uint8_t ICM20948_YA_OFFS_L           {0x18};
+        static constexpr uint8_t ICM20948_ZA_OFFS_H           {0x1A};
+        static constexpr uint8_t ICM20948_ZA_OFFS_L           {0x1B};
+        static constexpr uint8_t ICM20948_TIMEBASE_CORR_PLL   {0x28};
+
+        /* Registers ICM20948 USER BANK 2*/
+        static constexpr uint8_t ICM20948_GYRO_SMPLRT_DIV     {0x00};
+        static constexpr uint8_t ICM20948_GYRO_CONFIG_1       {0x01};
+        static constexpr uint8_t ICM20948_GYRO_CONFIG_2       {0x02};
+        static constexpr uint8_t ICM20948_XG_OFFS_USRH        {0x03};
+        static constexpr uint8_t ICM20948_XG_OFFS_USRL        {0x04};
+        static constexpr uint8_t ICM20948_YG_OFFS_USRH        {0x05};
+        static constexpr uint8_t ICM20948_YG_OFFS_USRL        {0x06};
+        static constexpr uint8_t ICM20948_ZG_OFFS_USRH        {0x07};
+        static constexpr uint8_t ICM20948_ZG_OFFS_USRL        {0x08};
+        static constexpr uint8_t ICM20948_ODR_ALIGN_EN        {0x09};
+        static constexpr uint8_t ICM20948_ACCEL_SMPLRT_DIV_1  {0x10};
+        static constexpr uint8_t ICM20948_ACCEL_SMPLRT_DIV_2  {0x11};
+        static constexpr uint8_t ICM20948_ACCEL_INTEL_CTRL    {0x12};
+        static constexpr uint8_t ICM20948_ACCEL_WOM_THR       {0x13};
+        static constexpr uint8_t ICM20948_ACCEL_CONFIG        {0x14};
+        static constexpr uint8_t ICM20948_ACCEL_CONFIG_2      {0x15};
+        static constexpr uint8_t ICM20948_FSYNC_CONFIG        {0x52};
+        static constexpr uint8_t ICM20948_TEMP_CONFIG         {0x53};
+        static constexpr uint8_t ICM20948_MOD_CTRL_USR        {0x54};
+
+        /* Registers ICM20948 USER BANK 3*/
+        static constexpr uint8_t ICM20948_I2C_MST_ODR_CFG     {0x00};
+        static constexpr uint8_t ICM20948_I2C_MST_CTRL        {0x01};
+        static constexpr uint8_t ICM20948_I2C_MST_DELAY_CTRL  {0x02};
+        static constexpr uint8_t ICM20948_I2C_SLV0_ADDR       {0x03};
+        static constexpr uint8_t ICM20948_I2C_SLV0_REG        {0x04};
+        static constexpr uint8_t ICM20948_I2C_SLV0_CTRL       {0x05};
+        static constexpr uint8_t ICM20948_I2C_SLV0_DO         {0x06};
+
+        /* Registers ICM20948 ALL BANKS */
+        static constexpr uint8_t ICM20948_REG_BANK_SEL        {0x7F};
+
+        /* Registers AK09916 */
+        static constexpr uint8_t AK09916_WIA_1    {0x00}; // Who I am, Company ID
+        static constexpr uint8_t AK09916_WIA_2    {0x01}; // Who I am, Device ID
+        static constexpr uint8_t AK09916_STATUS_1 {0x10};
+        static constexpr uint8_t AK09916_HXL      {0x11};
+        static constexpr uint8_t AK09916_HXH      {0x12};
+        static constexpr uint8_t AK09916_HYL      {0x13};
+        static constexpr uint8_t AK09916_HYH      {0x14};
+        static constexpr uint8_t AK09916_HZL      {0x15};
+        static constexpr uint8_t AK09916_HZH      {0x16};
+        static constexpr uint8_t AK09916_STATUS_2 {0x18};
+        static constexpr uint8_t AK09916_CNTL_2   {0x31};
+        static constexpr uint8_t AK09916_CNTL_3   {0x32};
+
+        /* Register Bits */
+        static constexpr uint8_t ICM20948_RESET              {0x80};
+        static constexpr uint8_t ICM20948_I2C_MST_EN         {0x20};
+        static constexpr uint8_t ICM20948_SLEEP              {0x40};
+        static constexpr uint8_t ICM20948_LP_EN              {0x20};
+        static constexpr uint8_t ICM20948_BYPASS_EN          {0x02};
+        static constexpr uint8_t ICM20948_GYR_EN             {0x07};
+        static constexpr uint8_t ICM20948_ACC_EN             {0x38};
+        static constexpr uint8_t ICM20948_FIFO_EN            {0x40};
+        static constexpr uint8_t ICM20948_INT1_ACTL          {0x80};
+        static constexpr uint8_t ICM20948_INT_1_LATCH_EN     {0x20};
+        static constexpr uint8_t ICM20948_ACTL_FSYNC         {0x08};
+        static constexpr uint8_t ICM20948_INT_ANYRD_2CLEAR   {0x10};
+        static constexpr uint8_t ICM20948_FSYNC_INT_MODE_EN  {0x06};
+        static constexpr uint8_t AK09916_16_BIT              {0x10};
+        static constexpr uint8_t AK09916_OVF                 {0x08};
+        static constexpr uint8_t AK09916_READ                {0x80};
+
+        /* Others */
+        static constexpr uint16_t AK09916_WHO_AM_I_1      {0x4809};
+        static constexpr uint16_t AK09916_WHO_AM_I_2      {0x0948};
+        static constexpr uint8_t ICM20948_WHO_AM_I_CONTENT{0xEA};
+        static constexpr float ICM20948_ROOM_TEMP_OFFSET  {0.0};
+        static constexpr float ICM20948_T_SENSITIVITY     {333.87};
+        static constexpr float AK09916_MAG_LSB            {0.1495};
+        
+        /* Constructors */
     
-    xyzFloat getAngles();
-    ICM20948_orientation getOrientation();
-    String getOrientationAsString();
-    float getPitch();
-    float getRoll();
-    
-    
-    /* Power, Sleep, Standby */ 
-    
-    void enableCycle(ICM20948_cycle cycle);
-    void enableLowPower(bool enLP);
-    void setGyrAverageInCycleMode(ICM20948_gyroAvgLowPower avg);
-    void setAccAverageInCycleMode(ICM20948_accAvgLowPower avg);
-    void sleep(bool sleep);
+        ICM20948_WE(uint8_t addr = 0x68) : _wire{&Wire}, i2cAddress{addr}, useSPI{false} {}
+        ICM20948_WE(TwoWire *w, uint8_t addr = 0x68) : _wire{w}, i2cAddress{addr}, useSPI{false} {}
+        ICM20948_WE(int cs, bool spi) : _spi{&SPI}, csPin{cs}, useSPI{spi} {}
+        ICM20948_WE(SPIClass *s, int cs, bool spi) : _spi{s}, csPin{cs}, useSPI{spi} {} 
     
    
-    /* Interrupts */
-    
-    void setIntPinPolarity(ICM20948_intPinPol pol);
-    void enableIntLatch(bool latch);
-    void enableClearIntByAnyRead(bool clearByAnyRead);
-    void setFSyncIntPolarity(ICM20948_intPinPol pol);
-    void enableInterrupt(ICM20948_intType intType);
-    void disableInterrupt(ICM20948_intType intType);
-    uint8_t readAndClearInterrupts();
-    bool checkInterrupt(uint8_t source, ICM20948_intType type);
-    void setWakeOnMotionThreshold(uint8_t womThresh, ICM20948_womCompEn womCompEn);
-    
-    
-    /* FIFO */
-    
-    void enableFifo(bool fifo);
-    void setFifoMode(ICM20948_fifoMode mode);
-    void startFifo(ICM20948_fifoType fifo);
-    void stopFifo();
-    void resetFifo();
-    int16_t getFifoCount();
-    int16_t getNumberOfFifoDataSets();
-    void findFifoBegin();
-    
-    
-    /* Magnetometer */
-    
-    bool initMagnetometer();
-    int16_t whoAmIMag();
-    void setMagOpMode(AK09916_opMode opMode);
-    void resetMag();
-    
-private:
-    TwoWire *_wire;
-    SPIClass *_spi;
-    SPISettings mySPISettings;
-    int i2cAddress;
-    uint8_t currentBank;
-    uint8_t buffer[20]; 
-    xyzFloat accOffsetVal;
-    xyzFloat accCorrFactor;
-    xyzFloat gyrOffsetVal;
-    uint8_t accRangeFactor;
-    uint8_t gyrRangeFactor;
-    uint8_t regVal;   // intermediate storage of register values
-    ICM20948_fifoType fifoType;
-    int16_t csPin;
-    bool useSPI;
-    void setClockToAutoSelect();
-    xyzFloat correctAccRawValues(xyzFloat accRawVal);
-    xyzFloat correctGyrRawValues(xyzFloat gyrRawVal);
-    void switchBank(uint8_t newBank);
-    void writeRegister8(uint8_t bank, uint8_t reg, uint8_t val);
-    void writeRegister16(uint8_t bank, uint8_t reg, int16_t val);
-    uint8_t readRegister8(uint8_t bank, uint8_t reg);
-    int16_t readRegister16(uint8_t bank, uint8_t reg);
-    void readAllData(uint8_t* data);
-    xyzFloat readICM20948xyzValFromFifo();
-    void writeAK09916Register8(uint8_t reg, uint8_t val);
-    uint8_t readAK09916Register8(uint8_t reg);
-    int16_t readAK09916Register16(uint8_t reg);
-    void reset_ICM20948();
-    void enableI2CMaster();
-    void enableMagDataRead(uint8_t reg, uint8_t bytes);
+       /* Basic settings */
+
+        bool init();
+        void autoOffsets();
+        void setAccOffsets(float xMin, float xMax, float yMin, float yMax, float zMin, float zMax);
+        void setGyrOffsets(float xOffset, float yOffset, float zOffset);    
+        uint8_t whoAmI();
+        void enableAcc(bool enAcc);
+        void setAccRange(ICM20948_accRange accRange);
+        void setAccDLPF(ICM20948_dlpf dlpf); 
+        void setAccSampleRateDivider(uint16_t accSplRateDiv);
+        void enableGyr(bool enGyr);
+        void setGyrRange(ICM20948_gyroRange gyroRange);
+        void setGyrDLPF(ICM20948_dlpf dlpf); 
+        void setGyrSampleRateDivider(uint8_t gyrSplRateDiv);
+        void setTempDLPF(ICM20948_dlpf dlpf);
+        void setI2CMstSampleRate(uint8_t rateExp);
+        void setSPIClockSpeed(unsigned long clock);   
+        
+        
+        /* x,y,z results */
+        
+        void readSensor(); 
+        xyzFloat getAccRawValues();
+        xyzFloat getCorrectedAccRawValues();
+        xyzFloat getGValues();
+        xyzFloat getAccRawValuesFromFifo();
+        xyzFloat getCorrectedAccRawValuesFromFifo();
+        xyzFloat getGValuesFromFifo();
+        float getResultantG(xyzFloat gVal); 
+        float getTemperature();
+        xyzFloat getGyrRawValues();
+        xyzFloat getCorrectedGyrRawValues();
+        xyzFloat getGyrValues(); 
+        xyzFloat getGyrValuesFromFifo();
+        xyzFloat getMagValues();
+        
+            
+        /* Angles and Orientation */ 
+        
+        xyzFloat getAngles();
+        ICM20948_orientation getOrientation();
+        String getOrientationAsString();
+        float getPitch();
+        float getRoll();
+        
+        
+        /* Power, Sleep, Standby */ 
+        
+        void enableCycle(ICM20948_cycle cycle);
+        void enableLowPower(bool enLP);
+        void setGyrAverageInCycleMode(ICM20948_gyroAvgLowPower avg);
+        void setAccAverageInCycleMode(ICM20948_accAvgLowPower avg);
+        void sleep(bool sleep);
+        
+       
+        /* Interrupts */
+        
+        void setIntPinPolarity(ICM20948_intPinPol pol);
+        void enableIntLatch(bool latch);
+        void enableClearIntByAnyRead(bool clearByAnyRead);
+        void setFSyncIntPolarity(ICM20948_intPinPol pol);
+        void enableInterrupt(ICM20948_intType intType);
+        void disableInterrupt(ICM20948_intType intType);
+        uint8_t readAndClearInterrupts();
+        bool checkInterrupt(uint8_t source, ICM20948_intType type);
+        void setWakeOnMotionThreshold(uint8_t womThresh, ICM20948_womCompEn womCompEn);
+        
+        
+        /* FIFO */
+        
+        void enableFifo(bool fifo);
+        void setFifoMode(ICM20948_fifoMode mode);
+        void startFifo(ICM20948_fifoType fifo);
+        void stopFifo();
+        void resetFifo();
+        int16_t getFifoCount();
+        int16_t getNumberOfFifoDataSets();
+        void findFifoBegin();
+        
+        
+        /* Magnetometer */
+        
+        bool initMagnetometer();
+        uint16_t whoAmIMag();
+        void setMagOpMode(AK09916_opMode opMode);
+        void resetMag();
+        
+    protected:
+        TwoWire *_wire;
+        SPIClass *_spi;
+        SPISettings mySPISettings;
+        uint8_t i2cAddress;
+        uint8_t currentBank;
+        uint8_t buffer[20]; 
+        xyzFloat accOffsetVal;
+        xyzFloat accCorrFactor;
+        xyzFloat gyrOffsetVal;
+        uint8_t accRangeFactor;
+        uint8_t gyrRangeFactor;
+        uint8_t regVal;   // intermediate storage of register values
+        ICM20948_fifoType fifoType;
+        int16_t csPin;
+        bool useSPI;
+        void setClockToAutoSelect();
+        xyzFloat correctAccRawValues(xyzFloat accRawVal);
+        xyzFloat correctGyrRawValues(xyzFloat gyrRawVal);
+        void switchBank(uint8_t newBank);
+        void writeRegister8(uint8_t bank, uint8_t reg, uint8_t val);
+        void writeRegister16(uint8_t bank, uint8_t reg, int16_t val);
+        uint8_t readRegister8(uint8_t bank, uint8_t reg);
+        int16_t readRegister16(uint8_t bank, uint8_t reg);
+        void readAllData(uint8_t* data);
+        xyzFloat readICM20948xyzValFromFifo();
+        void writeAK09916Register8(uint8_t reg, uint8_t val);
+        uint8_t readAK09916Register8(uint8_t reg);
+        int16_t readAK09916Register16(uint8_t reg);
+        void reset_ICM20948();
+        void enableI2CMaster();
+        void enableMagDataRead(uint8_t reg, uint8_t bytes);
 
 };
 

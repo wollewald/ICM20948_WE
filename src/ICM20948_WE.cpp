@@ -19,47 +19,7 @@
 
 #include "ICM20948_WE.h"
 
-/************  Constructors ************/
-
-ICM20948_WE::ICM20948_WE(int addr){
-    useSPI = false;
-    _wire = &Wire;
-    i2cAddress = addr;   
-}
-
-ICM20948_WE::ICM20948_WE(){
-    useSPI = false;
-    _wire = &Wire;
-    i2cAddress = 0x68;   
-}
-
-ICM20948_WE::ICM20948_WE(TwoWire *w, int addr){
-    useSPI = false;
-    _wire = w;
-    i2cAddress = addr; 
-}
-
-ICM20948_WE::ICM20948_WE(TwoWire *w){
-    useSPI = false;
-    _wire = w;
-    i2cAddress = 0x68;
-}
-
-ICM20948_WE::ICM20948_WE(SPIClass *s, int cs, bool spi){
-    useSPI = spi;
-    _spi = s;
-    csPin = cs;  
-}
-
-ICM20948_WE::ICM20948_WE(int cs, bool spi){
-    useSPI = spi;
-    _spi = &SPI;
-    csPin = cs;
-}
-
-
-/************ Basic Settings ************/
-    
+/************ Basic Settings ************/ 
 
 bool ICM20948_WE::init(){
     if(useSPI){
@@ -252,9 +212,9 @@ void ICM20948_WE::readSensor(){
 
 xyzFloat ICM20948_WE::getAccRawValues(){
     xyzFloat accRawVal;
-    accRawVal.x = (int16_t)(((buffer[0]) << 8) | buffer[1]) * 1.0;
-    accRawVal.y = (int16_t)(((buffer[2]) << 8) | buffer[3]) * 1.0;
-    accRawVal.z = (int16_t)(((buffer[4]) << 8) | buffer[5]) * 1.0;
+    accRawVal.x = static_cast<int16_t>(((buffer[0]) << 8) | buffer[1]) * 1.0;
+    accRawVal.y = static_cast<int16_t>(((buffer[2]) << 8) | buffer[3]) * 1.0;
+    accRawVal.z = static_cast<int16_t>(((buffer[4]) << 8) | buffer[5]) * 1.0;
     return accRawVal;
 }
 
@@ -305,7 +265,7 @@ float ICM20948_WE::getResultantG(xyzFloat gVal){
 }
 
 float ICM20948_WE::getTemperature(){
-    int16_t rawTemp = (int16_t)(((buffer[12]) << 8) | buffer[13]);
+    int16_t rawTemp = static_cast<int16_t>(((buffer[12]) << 8) | buffer[13]);
     float tmp = (rawTemp*1.0 - ICM20948_ROOM_TEMP_OFFSET)/ICM20948_T_SENSITIVITY + 21.0;
     return tmp;
 }
@@ -352,9 +312,9 @@ xyzFloat ICM20948_WE::getMagValues(){
     int16_t x,y,z;
     xyzFloat mag;
     
-    x = (int16_t)((buffer[15]) << 8) | buffer[14];
-    y = (int16_t)((buffer[17]) << 8) | buffer[16];
-    z = (int16_t)((buffer[19]) << 8) | buffer[18];
+    x = static_cast<int16_t>((buffer[15]) << 8) | buffer[14];
+    y = static_cast<int16_t>((buffer[17]) << 8) | buffer[16];
+    z = static_cast<int16_t>((buffer[19]) << 8) | buffer[18];
     
     mag.x = x * AK09916_MAG_LSB;
     mag.y = y * AK09916_MAG_LSB;
@@ -703,7 +663,7 @@ void ICM20948_WE::resetFifo(){
 }
 
 int16_t ICM20948_WE::getFifoCount(){
-    int16_t regVal16 = (int16_t) readRegister16(0, ICM20948_FIFO_COUNT);
+    int16_t regVal16 = static_cast<int16_t>(readRegister16(0, ICM20948_FIFO_COUNT));
     return regVal16;
 }
 
@@ -760,8 +720,8 @@ bool ICM20948_WE::initMagnetometer(){
     return true;
 }
 
-int16_t ICM20948_WE::whoAmIMag(){
-    return readAK09916Register16(AK09916_WIA_1);
+uint16_t ICM20948_WE::whoAmIMag(){
+    return static_cast<uint16_t>(readAK09916Register16(AK09916_WIA_1));
 }
 
 void ICM20948_WE::setMagOpMode(AK09916_opMode opMode){
@@ -845,7 +805,7 @@ void ICM20948_WE::writeRegister8(uint8_t bank, uint8_t reg, uint8_t val){
 
 void ICM20948_WE::writeRegister16(uint8_t bank, uint8_t reg, int16_t val){
     switchBank(bank);
-    int8_t MSByte = (int8_t)((val>>8) & 0xFF);
+    int8_t MSByte = static_cast<int8_t>((val>>8) & 0xFF);
     uint8_t LSByte = val & 0xFF;
         
     if(!useSPI){
@@ -873,7 +833,7 @@ uint8_t ICM20948_WE::readRegister8(uint8_t bank, uint8_t reg){
         _wire->beginTransmission(i2cAddress);
         _wire->write(reg);
         _wire->endTransmission(false);
-        _wire->requestFrom(i2cAddress,1);
+        _wire->requestFrom(i2cAddress, static_cast<uint8_t>(1));
         if(_wire->available()){
             regValue = _wire->read();
         }
@@ -899,7 +859,7 @@ int16_t ICM20948_WE::readRegister16(uint8_t bank, uint8_t reg){
         _wire->beginTransmission(i2cAddress);
         _wire->write(reg);
         _wire->endTransmission(false);
-        _wire->requestFrom(i2cAddress,2);
+        _wire->requestFrom(i2cAddress, static_cast<uint8_t>(2));
         if(_wire->available()){
             MSByte = _wire->read();
             LSByte = _wire->read();
@@ -926,7 +886,7 @@ void ICM20948_WE::readAllData(uint8_t* data){
         _wire->beginTransmission(i2cAddress);
         _wire->write(ICM20948_ACCEL_OUT);
         _wire->endTransmission(false);
-        _wire->requestFrom(i2cAddress,20);
+        _wire->requestFrom(i2cAddress, static_cast<uint8_t>(20));
         if(_wire->available()){
             for(int i=0; i<20; i++){
                 data[i] = _wire->read();
@@ -955,7 +915,7 @@ xyzFloat ICM20948_WE::readICM20948xyzValFromFifo(){
         _wire->beginTransmission(i2cAddress);
         _wire->write(ICM20948_FIFO_R_W);
         _wire->endTransmission(false);
-        _wire->requestFrom(i2cAddress,6);
+        _wire->requestFrom(i2cAddress, static_cast<uint8_t>(6));
         if(_wire->available()){
             for(int i=0; i<6; i++){
                 fifoTriple[i] = _wire->read();
@@ -974,9 +934,9 @@ xyzFloat ICM20948_WE::readICM20948xyzValFromFifo(){
         _spi->endTransaction();
     }
     
-    xyzResult.x = ((int16_t)((fifoTriple[0]<<8) + fifoTriple[1])) * 1.0;
-    xyzResult.y = ((int16_t)((fifoTriple[2]<<8) + fifoTriple[3])) * 1.0;
-    xyzResult.z = ((int16_t)((fifoTriple[4]<<8) + fifoTriple[5])) * 1.0;
+    xyzResult.x = (static_cast<int16_t>((fifoTriple[0]<<8) + fifoTriple[1])) * 1.0;
+    xyzResult.y = (static_cast<int16_t>((fifoTriple[2]<<8) + fifoTriple[3])) * 1.0;
+    xyzResult.z = (static_cast<int16_t>((fifoTriple[4]<<8) + fifoTriple[5])) * 1.0;
     
     return xyzResult; 
 }
