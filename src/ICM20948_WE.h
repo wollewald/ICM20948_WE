@@ -341,7 +341,7 @@ class ICM20948_WE
         uint8_t gyrRangeFactor;
         uint8_t regVal;   // intermediate storage of register values
         ICM20948_fifoType fifoType;
-        int16_t csPin;
+        int csPin;
         bool useSPI;
         void setClockToAutoSelect();
         xyzFloat correctAccRawValues(xyzFloat accRawVal);
