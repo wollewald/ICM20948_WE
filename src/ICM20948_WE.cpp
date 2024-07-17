@@ -707,17 +707,27 @@ bool ICM20948_WE::initMagnetometer(){
     reset_ICM20948();
     sleep(false);
     writeRegister8(2, ICM20948_ODR_ALIGN_EN, 1); // aligns ODR 
-    delay(10);
-    enableI2CMaster();
-    delay(10);
     
-    int16_t whoAmI = whoAmIMag();
-    if(! ((whoAmI == AK09916_WHO_AM_I_1) || (whoAmI == AK09916_WHO_AM_I_2))){
-        return false;
+    bool initSuccess = false;
+    uint8_t tries = 0;
+    while(!initSuccess && (tries < 10)){ // max. 10 tries to init the magnetometer
+        delay(10);
+        enableI2CMaster();
+        delay(10);
+        
+        int16_t whoAmI = whoAmIMag();
+        if(! ((whoAmI == AK09916_WHO_AM_I_1) || (whoAmI == AK09916_WHO_AM_I_2))){
+            initSuccess = false;
+            i2cMasterReset();
+        }
+        else {
+            initSuccess = true;
+        }
     }
-    setMagOpMode(AK09916_CONT_MODE_100HZ); 
-   
-    return true;
+    if(initSuccess){
+        setMagOpMode(AK09916_CONT_MODE_100HZ);
+    }
+    return initSuccess;
 }
 
 uint16_t ICM20948_WE::whoAmIMag(){
@@ -972,6 +982,13 @@ void ICM20948_WE::enableI2CMaster(){
     writeRegister8(0, ICM20948_USER_CTRL, ICM20948_I2C_MST_EN); //enable I2C master
     writeRegister8(3, ICM20948_I2C_MST_CTRL, 0x07); // set I2C clock to 345.60 kHz
     delay(10);
+}
+
+void ICM20948_WE::i2cMasterReset(){
+    uint8_t regVal = readRegister8(0, ICM20948_USER_CTRL);
+    regVal |= ICM20948_I2C_MST_RST;
+    writeRegister8(0, ICM20948_USER_CTRL, regVal);
+    delay(10);  
 }
 
 void ICM20948_WE::enableMagDataRead(uint8_t reg, uint8_t bytes){

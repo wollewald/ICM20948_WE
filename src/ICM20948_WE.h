@@ -230,6 +230,7 @@ class ICM20948_WE
         static constexpr float ICM20948_ROOM_TEMP_OFFSET  {0.0};
         static constexpr float ICM20948_T_SENSITIVITY     {333.87};
         static constexpr float AK09916_MAG_LSB            {0.1495};
+        static constexpr uint8_t ICM20948_I2C_MST_RST     {0x02};
         
         /* Constructors */
     
@@ -358,6 +359,7 @@ class ICM20948_WE
         int16_t readAK09916Register16(uint8_t reg);
         void reset_ICM20948();
         void enableI2CMaster();
+        void i2cMasterReset();
         void enableMagDataRead(uint8_t reg, uint8_t bytes);
 
 };
