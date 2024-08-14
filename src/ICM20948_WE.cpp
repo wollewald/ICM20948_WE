@@ -32,7 +32,10 @@ bool ICM20948_WE::init(){
     
     reset_ICM20948();
     if(whoAmI() != ICM20948_WHO_AM_I_CONTENT){
-        return false;
+        delay(2000);
+        if(whoAmI() != ICM20948_WHO_AM_I_CONTENT){
+            return false;
+        }
     }
     
     accOffsetVal.x = 0.0;
