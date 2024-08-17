@@ -30,6 +30,7 @@ const int intPin = 2;
 volatile bool fsyncEvent = false;
 
 void setup() {
+  //delay(2000); // maybe needed for some MCUs, in particular for startup after power off
   Wire.begin();
   Serial.begin(115200);
   while(!Serial) {}
