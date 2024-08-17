@@ -722,6 +722,7 @@ bool ICM20948_WE::initMagnetometer(){
         if(! ((whoAmI == AK09916_WHO_AM_I_1) || (whoAmI == AK09916_WHO_AM_I_2))){
             initSuccess = false;
             i2cMasterReset();
+            tries++;
         }
         else {
             initSuccess = true;
