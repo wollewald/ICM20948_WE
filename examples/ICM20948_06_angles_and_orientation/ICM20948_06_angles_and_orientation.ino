@@ -56,6 +56,10 @@ void setup() {
    * depend on the positioning.
    * This function needs to be called after setAccOffsets but before other settings since 
    * it will overwrite settings!
+   * You can query the offsets with the function:
+   * xyzFloat getAccOffsets()
+   * You can apply the offset using:
+   * setAccOffsets(xyzFloat yourOffsets)
    */
   Serial.println("Position your ICM20948 flat and don't move it - calibrating...");
   delay(1000);
