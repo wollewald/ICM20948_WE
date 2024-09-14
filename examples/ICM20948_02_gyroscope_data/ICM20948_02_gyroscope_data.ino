@@ -47,7 +47,9 @@ void setup() {
    *  To start at zero, you can apply offset values. These are the gyroscope raw values you obtain
    *  using the +/- 250 degrees/s range. 
    *  Use either autoOffsets or setGyrOffsets, not both.
-   */
+   *  You can query the offsets with the function:
+   *  xyzFloat getGyrOffsets()
+  */
   //myIMU.setGyrOffsets(-115.0, 130.0, 105.0);
   
   /* enables or disables the gyroscope sensor, default: enabled */
