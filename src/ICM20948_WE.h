@@ -245,8 +245,12 @@ class ICM20948_WE
         bool init();
         void autoOffsets();
         void setAccOffsets(float xMin, float xMax, float yMin, float yMax, float zMin, float zMax);
-        void setGyrOffsets(float xOffset, float yOffset, float zOffset);    
-        uint8_t whoAmI();
+        void setAccOffsets(xyzFloat offset); // for writing back previous offsets
+		xyzFloat getAccOffsets();
+		void setGyrOffsets(float xOffset, float yOffset, float zOffset);    
+        void setGyrOffsets(xyzFloat offset); // for writing back previous offsets
+        xyzFloat getGyrOffsets();
+		uint8_t whoAmI();
         void enableAcc(bool enAcc);
         void setAccRange(ICM20948_accRange accRange);
         void setAccDLPF(ICM20948_dlpf dlpf); 

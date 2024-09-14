@@ -68,6 +68,11 @@ void ICM20948_WE::autoOffsets(){
     setAccRange(ICM20948_ACC_RANGE_2G);
     setAccDLPF(ICM20948_DLPF_6);
     delay(100);
+
+	for(int i=0; i<10; i++){  // Allow to get stable values
+        readSensor();
+		delay(10);
+    }
     
     for(int i=0; i<50; i++){
         readSensor();
@@ -107,10 +112,26 @@ void ICM20948_WE::setAccOffsets(float xMin, float xMax, float yMin, float yMax, 
     accCorrFactor.z = (zMax + abs(zMin)) / 32768.0 ;    
 }
 
+void ICM20948_WE::setAccOffsets(xyzFloat offset){
+    accOffsetVal = offset;
+}
+
+xyzFloat ICM20948_WE::getAccOffsets(){
+    return accOffsetVal;
+}
+
 void ICM20948_WE::setGyrOffsets(float xOffset, float yOffset, float zOffset){
     gyrOffsetVal.x = xOffset;
     gyrOffsetVal.y = yOffset;
     gyrOffsetVal.z = zOffset;
+}
+
+void ICM20948_WE::setGyrOffsets(xyzFloat offset){
+    gyrOffsetVal = offset;
+}
+
+xyzFloat ICM20948_WE::getGyrOffsets(){
+    return gyrOffsetVal;
 }
 
 uint8_t ICM20948_WE::whoAmI(){
