@@ -187,6 +187,11 @@ class ICM20948_WE
         static constexpr uint8_t ICM20948_I2C_SLV0_REG        {0x04};
         static constexpr uint8_t ICM20948_I2C_SLV0_CTRL       {0x05};
         static constexpr uint8_t ICM20948_I2C_SLV0_DO         {0x06};
+        static constexpr uint8_t ICM20948_I2C_SLV4_ADDR       {0x13}; 
+        static constexpr uint8_t ICM20948_I2C_SLV4_REG        {0x14}; 
+        static constexpr uint8_t ICM20948_I2C_SLV4_CTRL       {0x15}; 
+        static constexpr uint8_t ICM20948_I2C_SLV4_DO         {0x16}; 
+        static constexpr uint8_t ICM20948_I2C_SLV4_DI         {0x17}; 
 
         /* Registers ICM20948 ALL BANKS */
         static constexpr uint8_t ICM20948_REG_BANK_SEL        {0x7F};
@@ -219,6 +224,7 @@ class ICM20948_WE
         static constexpr uint8_t ICM20948_ACTL_FSYNC         {0x08};
         static constexpr uint8_t ICM20948_INT_ANYRD_2CLEAR   {0x10};
         static constexpr uint8_t ICM20948_FSYNC_INT_MODE_EN  {0x06};
+        static constexpr uint8_t ICM20948_I2C_SLVX_EN        {0x80};
         static constexpr uint8_t AK09916_16_BIT              {0x10};
         static constexpr uint8_t AK09916_OVF                 {0x08};
         static constexpr uint8_t AK09916_READ                {0x80};
@@ -246,11 +252,11 @@ class ICM20948_WE
         void autoOffsets();
         void setAccOffsets(float xMin, float xMax, float yMin, float yMax, float zMin, float zMax);
         void setAccOffsets(xyzFloat offset); // for writing back previous offsets
-		xyzFloat getAccOffsets();
-		void setGyrOffsets(float xOffset, float yOffset, float zOffset);    
+        xyzFloat getAccOffsets();
+        void setGyrOffsets(float xOffset, float yOffset, float zOffset);    
         void setGyrOffsets(xyzFloat offset); // for writing back previous offsets
         xyzFloat getGyrOffsets();
-		uint8_t whoAmI();
+        uint8_t whoAmI();
         void enableAcc(bool enAcc);
         void setAccRange(ICM20948_accRange accRange);
         void setAccDLPF(ICM20948_dlpf dlpf); 
@@ -358,12 +364,13 @@ class ICM20948_WE
         int16_t readRegister16(uint8_t bank, uint8_t reg);
         void readAllData(uint8_t* data);
         xyzFloat readICM20948xyzValFromFifo();
-        void writeAK09916Register8(uint8_t reg, uint8_t val);
-        uint8_t readAK09916Register8(uint8_t reg);
+        void writeAK09916Register8_SLV4(uint8_t reg, uint8_t val);
+        uint8_t readAK09916Register8_SLV4(uint8_t reg);
         int16_t readAK09916Register16(uint8_t reg);
         void reset_ICM20948();
         void enableI2CMaster();
         void i2cMasterReset();
+        void enableMagDataRead_SLV4(uint8_t reg);
         void enableMagDataRead(uint8_t reg, uint8_t bytes);
 
 };

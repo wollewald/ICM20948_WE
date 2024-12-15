@@ -31,12 +31,14 @@ bool ICM20948_WE::init(){
     currentBank = 0;
     
     reset_ICM20948();
-    if(whoAmI() != ICM20948_WHO_AM_I_CONTENT){
-        delay(2000);
-        if(whoAmI() != ICM20948_WHO_AM_I_CONTENT){
-            return false;
-        }
+    
+    uint8_t tries = 0;
+    while(( whoAmI() != ICM20948_WHO_AM_I_CONTENT) && (tries < 10)){
+        reset_ICM20948();
+        delay(300);
+        tries++;        
     }
+    if(tries == 10) return false;
     
     accOffsetVal.x = 0.0;
     accOffsetVal.y = 0.0;
@@ -69,9 +71,9 @@ void ICM20948_WE::autoOffsets(){
     setAccDLPF(ICM20948_DLPF_6);
     delay(100);
 
-	for(int i=0; i<10; i++){  // Allow to get stable values
+    for(int i=0; i<10; i++){  // Allow to get stable values
         readSensor();
-		delay(10);
+        delay(10);
     }
     
     for(int i=0; i<50; i++){
@@ -334,6 +336,7 @@ xyzFloat ICM20948_WE::getGyrValuesFromFifo(){
 
 xyzFloat ICM20948_WE::getMagValues(){
     int16_t x,y,z;
+    
     xyzFloat mag;
     
     x = static_cast<int16_t>((buffer[15]) << 8) | buffer[14];
@@ -346,7 +349,6 @@ xyzFloat ICM20948_WE::getMagValues(){
     
     return mag;
 }
-
 
 /********* Power, Sleep, Standby *********/ 
 
@@ -740,8 +742,8 @@ bool ICM20948_WE::initMagnetometer(){
         delay(10);
         
         int16_t whoAmI = whoAmIMag();
-        if(! ((whoAmI == AK09916_WHO_AM_I_1) || (whoAmI == AK09916_WHO_AM_I_2))){
-            initSuccess = false;
+       if(! ((whoAmI == AK09916_WHO_AM_I_1) || (whoAmI == AK09916_WHO_AM_I_2))){
+           initSuccess = false;
             i2cMasterReset();
             tries++;
         }
@@ -755,12 +757,15 @@ bool ICM20948_WE::initMagnetometer(){
     return initSuccess;
 }
 
-uint16_t ICM20948_WE::whoAmIMag(){
-    return static_cast<uint16_t>(readAK09916Register16(AK09916_WIA_1));
+uint16_t ICM20948_WE::whoAmIMag(){ 
+    uint8_t MSByte = readAK09916Register8_SLV4(AK09916_WIA_1);
+    uint8_t LSByte = readAK09916Register8_SLV4(AK09916_WIA_2);
+    uint16_t magID = (MSByte<<8) | LSByte;
+    return magID;
 }
 
 void ICM20948_WE::setMagOpMode(AK09916_opMode opMode){
-    writeAK09916Register8(AK09916_CNTL_2, opMode);
+    writeAK09916Register8_SLV4(AK09916_CNTL_2, opMode);
     delay(10);
     if(opMode!=AK09916_PWR_DOWN){
         enableMagDataRead(AK09916_HXL, 0x08);
@@ -768,7 +773,7 @@ void ICM20948_WE::setMagOpMode(AK09916_opMode opMode){
 }
 
 void ICM20948_WE::resetMag(){
-    writeAK09916Register8(AK09916_CNTL_3, 0x01);
+    writeAK09916Register8_SLV4(AK09916_CNTL_3, 0x01);
     delay(100);
 }
 
@@ -976,21 +981,24 @@ xyzFloat ICM20948_WE::readICM20948xyzValFromFifo(){
     return xyzResult; 
 }
 
-void ICM20948_WE::writeAK09916Register8(uint8_t reg, uint8_t val){
-    writeRegister8(3, ICM20948_I2C_SLV0_ADDR, AK09916_ADDRESS); // write AK09916
-    writeRegister8(3, ICM20948_I2C_SLV0_REG, reg); // define AK09916 register to be written to
-    writeRegister8(3, ICM20948_I2C_SLV0_DO, val);
+void ICM20948_WE::writeAK09916Register8_SLV4(uint8_t reg, uint8_t val){ // only as slave 0
+    writeRegister8(3, ICM20948_I2C_SLV4_ADDR, AK09916_ADDRESS); // write AK09916
+    writeRegister8(3, ICM20948_I2C_SLV4_DO, val);
+    writeRegister8(3, ICM20948_I2C_SLV4_CTRL, ICM20948_I2C_SLVX_EN);
+    delay(10);
+    writeRegister8(3, ICM20948_I2C_SLV4_REG, reg); // define AK09916 register to be written to
+    while(readRegister8(3, ICM20948_I2C_SLV4_CTRL) & ICM20948_I2C_SLVX_EN){;}
 }
 
-
-uint8_t ICM20948_WE::readAK09916Register8(uint8_t reg){
-    enableMagDataRead(reg, 0x01);
+uint8_t ICM20948_WE::readAK09916Register8_SLV4(uint8_t reg){ // only as slave 4
+    enableMagDataRead_SLV4(reg);
+    regVal = readRegister8(3, ICM20948_I2C_SLV4_DI);
     enableMagDataRead(AK09916_HXL, 0x08);
-    regVal = readRegister8(0, ICM20948_EXT_SLV_SENS_DATA_00);
+    while(readRegister8(3, ICM20948_I2C_SLV4_CTRL) & ICM20948_I2C_SLVX_EN){;}
     return regVal;
 }
 
-int16_t ICM20948_WE::readAK09916Register16(uint8_t reg){
+int16_t ICM20948_WE::readAK09916Register16(uint8_t reg){ // only as slave 0
     int16_t regValue = 0;
     enableMagDataRead(reg, 0x02);
     regValue = readRegister16(0, ICM20948_EXT_SLV_SENS_DATA_00);
@@ -1011,15 +1019,21 @@ void ICM20948_WE::enableI2CMaster(){
 
 void ICM20948_WE::i2cMasterReset(){
     uint8_t regVal = readRegister8(0, ICM20948_USER_CTRL);
-    regVal |= ICM20948_I2C_MST_RST;
+    regVal |= ICM20948_I2C_MST_RST;    
     writeRegister8(0, ICM20948_USER_CTRL, regVal);
     delay(10);  
 }
 
+void ICM20948_WE::enableMagDataRead_SLV4(uint8_t reg){
+    writeRegister8(3, ICM20948_I2C_SLV4_ADDR, AK09916_ADDRESS | AK09916_READ); // read AK09916
+    writeRegister8(3, ICM20948_I2C_SLV4_REG, reg); // define AK09916 register to be read
+    writeRegister8(3, ICM20948_I2C_SLV4_CTRL, ICM20948_I2C_SLVX_EN);
+    delay(10);
+}
+ 
 void ICM20948_WE::enableMagDataRead(uint8_t reg, uint8_t bytes){
     writeRegister8(3, ICM20948_I2C_SLV0_ADDR, AK09916_ADDRESS | AK09916_READ); // read AK09916
     writeRegister8(3, ICM20948_I2C_SLV0_REG, reg); // define AK09916 register to be read
-    writeRegister8(3, ICM20948_I2C_SLV0_CTRL, 0x80 | bytes); //enable read | number of byte
+    writeRegister8(3, ICM20948_I2C_SLV0_CTRL, ICM20948_I2C_SLVX_EN | bytes); //enable read | number of byte
     delay(10);
 }
-  
