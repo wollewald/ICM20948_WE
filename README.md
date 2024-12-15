@@ -13,8 +13,7 @@ If you find bugs please inform me. If you like the library it would be great if 
 
 If you are not familiar with the ICM20948 I recommend to work through the example sketches.
 
-When you wire the ICM-20948 you need to consider that VDD is 3.3 volts, but VDDIO is only 1.71-1.95 volts (see data sheet). For a 5V MCU board, I used a level shifter and additional resistors to GND.
+When you wire the ICM-20948 you need to consider that VDD is 3.3 volts, but VDDIO is only 1.71-1.95 volts (see data sheet). For a 5V MCU board, I used a level shifter and additional resistors to GND which form a voltage divider together with the internal resistors of the level shifter.
 
-Known issue:
-* If you upload sketches, the magnetometer occasionally does not respond. If you disconnect from power and then reconnect it will work. For some boards, e.g. ESP32 it is the other way round: uploads work,
-  but sometimes there are issues after re-powering.  
+(Formerly) Known issue:
+Before version 1.2.0, using my library caused sporadic connection issues after re-powering. This has been solved by setting up the magnetometer as SLV4. The magnetometer data reading is still done using the magnetometer as SLV0. Please inform me if you should still have issues.      
