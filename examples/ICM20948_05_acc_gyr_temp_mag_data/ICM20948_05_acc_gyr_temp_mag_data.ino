@@ -186,6 +186,7 @@ void setup() {
    * AK09916_CONT_MODE_100HZ   Continuous measurements, 100 Hz rate (default)
    */
   myIMU.setMagOpMode(AK09916_CONT_MODE_20HZ);
+  // delay(50); // add a delay of 1000/magRate to avoid first mag value being zero 
 }
 
 void loop() {
