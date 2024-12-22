@@ -9,6 +9,7 @@
 * If you find bugs, please inform me!
 * 
 * Written by Wolfgang (Wolle) Ewald
+* Fork to test SLV4 modification by @ChrisHul
 *
 * Further information can be found on:
 *
@@ -981,21 +982,20 @@ xyzFloat ICM20948_WE::readICM20948xyzValFromFifo(){
     return xyzResult; 
 }
 
-void ICM20948_WE::writeAK09916Register8_SLV4(uint8_t reg, uint8_t val){ // only as slave 0
+void ICM20948_WE::writeAK09916Register8_SLV4(uint8_t reg, uint8_t val){
     writeRegister8(3, ICM20948_I2C_SLV4_ADDR, AK09916_ADDRESS); // write AK09916
     writeRegister8(3, ICM20948_I2C_SLV4_DO, val);
-    writeRegister8(3, ICM20948_I2C_SLV4_CTRL, ICM20948_I2C_SLVX_EN);
-    delay(10);
     writeRegister8(3, ICM20948_I2C_SLV4_REG, reg); // define AK09916 register to be written to
+    writeRegister8(3, ICM20948_I2C_SLV4_CTRL, ICM20948_I2C_SLVX_EN);
     while(readRegister8(3, ICM20948_I2C_SLV4_CTRL) & ICM20948_I2C_SLVX_EN){;}
 }
 
 uint8_t ICM20948_WE::readAK09916Register8_SLV4(uint8_t reg){ // only as slave 4
-    enableMagDataRead_SLV4(reg);
-    regVal = readRegister8(3, ICM20948_I2C_SLV4_DI);
-    enableMagDataRead(AK09916_HXL, 0x08);
+    writeRegister8(3, ICM20948_I2C_SLV4_ADDR, AK09916_ADDRESS | AK09916_READ); // read AK09916
+    writeRegister8(3, ICM20948_I2C_SLV4_REG, reg); // define AK09916 register to be read
+    writeRegister8(3, ICM20948_I2C_SLV4_CTRL, ICM20948_I2C_SLVX_EN);
     while(readRegister8(3, ICM20948_I2C_SLV4_CTRL) & ICM20948_I2C_SLVX_EN){;}
-    return regVal;
+    return readRegister8(3, ICM20948_I2C_SLV4_DI);
 }
 
 int16_t ICM20948_WE::readAK09916Register16(uint8_t reg){ // only as slave 0
@@ -1025,10 +1025,6 @@ void ICM20948_WE::i2cMasterReset(){
 }
 
 void ICM20948_WE::enableMagDataRead_SLV4(uint8_t reg){
-    writeRegister8(3, ICM20948_I2C_SLV4_ADDR, AK09916_ADDRESS | AK09916_READ); // read AK09916
-    writeRegister8(3, ICM20948_I2C_SLV4_REG, reg); // define AK09916 register to be read
-    writeRegister8(3, ICM20948_I2C_SLV4_CTRL, ICM20948_I2C_SLVX_EN);
-    delay(10);
 }
  
 void ICM20948_WE::enableMagDataRead(uint8_t reg, uint8_t bytes){
