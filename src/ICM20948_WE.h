@@ -370,7 +370,6 @@ class ICM20948_WE
         void reset_ICM20948();
         void enableI2CMaster();
         void i2cMasterReset();
-        void enableMagDataRead_SLV4(uint8_t reg);
         void enableMagDataRead(uint8_t reg, uint8_t bytes);
 
 };
