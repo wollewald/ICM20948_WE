@@ -1024,9 +1024,6 @@ void ICM20948_WE::i2cMasterReset(){
     delay(10);  
 }
 
-void ICM20948_WE::enableMagDataRead_SLV4(uint8_t reg){
-}
- 
 void ICM20948_WE::enableMagDataRead(uint8_t reg, uint8_t bytes){
     writeRegister8(3, ICM20948_I2C_SLV0_ADDR, AK09916_ADDRESS | AK09916_READ); // read AK09916
     writeRegister8(3, ICM20948_I2C_SLV0_REG, reg); // define AK09916 register to be read
