@@ -44,12 +44,15 @@ void setup() {
 }
 
 void loop() {
+  xyzFloat gValue;
+  xyzFloat gyr;
+  xyzFloat magValue;
   myIMU.readSensor();
-  xyzFloat gValue = myIMU.getGValues();
-  xyzFloat gyr = myIMU.getGyrValues();
-  xyzFloat magValue = myIMU.getMagValues();
+  myIMU.getGValues(&gValue);
+  myIMU.getGyrValues(&gyr);
+  myIMU.getMagValues(&magValue);
   float temp = myIMU.getTemperature();
-  float resultantG = myIMU.getResultantG(gValue);
+  float resultantG = myIMU.getResultantG(&gValue);
 
   Serial.println("Acceleration in g (x,y,z):");
   Serial.print(gValue.x);
