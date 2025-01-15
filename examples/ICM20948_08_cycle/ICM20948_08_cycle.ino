@@ -53,7 +53,7 @@ void setup() {
    *  The calibration changes the slope / ratio of raw acceleration vs g. The zero point is 
    *  set as (min + max)/2.
    */
-  myIMU.setAccOffsets(-16330.0, 16450.0, -16600.0, 16180.0, -16640.0, 16560.0);
+//  myIMU.setAccOffsets(-16330.0, 16450.0, -16600.0, 16180.0, -16640.0, 16560.0);
     
   /*  The starting point, if you position the ICM20948 flat, is not necessarily 0g/0g/1g for x/y/z. 
    *  The autoOffset function measures offset. It assumes your ICM20948 is positioned flat with its 
@@ -78,7 +78,7 @@ void setup() {
    *  using the +/- 250 degrees/s range. 
    *  Use either autoOffset or setGyrOffsets, not both.
    */
-  myIMU.setGyrOffsets(-115.0, 130.0, 105.0);
+//  myIMU.setGyrOffsets(-115.0, 130.0, 105.0);
   
   
   /* enables or disables the acceleration sensor, default: enabled */
@@ -200,10 +200,13 @@ void setup() {
 }
 
 void loop() {
+  xyzFloat gValue; 
+  xyzFloat gyrValue; 
+  xyzFloat magValue; 
   myIMU.readSensor();
-  xyzFloat gValue = myIMU.getGValues();
-  xyzFloat gyrValue = myIMU.getGyrValues();
-  xyzFloat magValue = myIMU.getMagValues(); 
+  myIMU.getGValues(&gValue);
+  myIMU.getGyrValues(&gyrValue);
+  myIMU.getMagValues(&magValue); 
       
   Serial.println("g-values (x,y,z):");
   Serial.print(gValue.x);
