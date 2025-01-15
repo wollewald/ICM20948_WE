@@ -137,16 +137,17 @@ void setup() {
 }
 
 void loop() {
-  myIMU.readSensor();
   xyzFloat accRaw;
   xyzFloat gyrRaw;
   xyzFloat corrAccRaw;
   xyzFloat corrGyrRaw;
-  accRaw = myIMU.getAccRawValues();
-  gyrRaw = myIMU.getGyrRawValues();
-  corrAccRaw = myIMU.getCorrectedAccRawValues();
-  corrGyrRaw = myIMU.getCorrectedGyrRawValues();
-  xyzFloat gVal = myIMU.getGValues();
+  xyzFloat gVal;
+  myIMU.readSensor();
+  myIMU.getAccRawValues(&accRaw);
+  myIMU.getGyrRawValues(&gyrRaw);
+  myIMU.getCorrectedAccRawValues(&corrAccRaw);
+  myIMU.getCorrectedGyrRawValues(&corrGyrRaw);
+  myIMU.getGValues(&gVal);
   
   Serial.println("Acceleration raw values without offset:");
   Serial.print(accRaw.x);
