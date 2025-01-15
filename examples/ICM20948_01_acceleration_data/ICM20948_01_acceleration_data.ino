@@ -107,11 +107,14 @@ void setup() {
 }
 
 void loop() {
+  xyzFloat accRaw;
+  xyzFloat corrAccRaw;
+  xyzFloat gVal;
   myIMU.readSensor();
-  xyzFloat accRaw = myIMU.getAccRawValues();
-  xyzFloat corrAccRaw = myIMU.getCorrectedAccRawValues();
-  xyzFloat gVal = myIMU.getGValues();
-  float resultantG = myIMU.getResultantG(gVal);
+  myIMU.getAccRawValues(&accRaw);
+  myIMU.getCorrectedAccRawValues(&corrAccRaw);
+  myIMU.getGValues(&gVal);
+  float resultantG = myIMU.getResultantG(&gVal);
 
    
   Serial.println("Raw acceleration values (x,y,z):");
