@@ -9,7 +9,6 @@
 * If you find bugs, please inform me!
 * 
 * Written by Wolfgang (Wolle) Ewald
-* Fork to test SLV4 modification by @ChrisHul
 *
 * Further information can be found on:
 *
@@ -26,7 +25,12 @@ bool ICM20948_WE::init(){
     if(useSPI){
         pinMode(csPin, OUTPUT);
         digitalWrite(csPin, HIGH);
-        _spi->begin();
+        if(spiPinsChanged){
+            _spi->begin(sclPin, misoPin, mosiPin, csPin);
+        }
+        else{
+            _spi->begin();
+        }
         mySPISettings = SPISettings(7000000, MSBFIRST, SPI_MODE0);      
     }   
     currentBank = 0;
@@ -79,7 +83,7 @@ void ICM20948_WE::autoOffsets(){
     
     for(int i=0; i<50; i++){
         readSensor();
-        accRawVal = getAccRawValues();
+        getAccRawValues(&accRawVal);
         accOffsetVal.x += accRawVal.x;
         accOffsetVal.y += accRawVal.y;
         accOffsetVal.z += accRawVal.z;
@@ -93,7 +97,7 @@ void ICM20948_WE::autoOffsets(){
     
     for(int i=0; i<50; i++){
         readSensor();
-        gyrRawVal = getGyrRawValues();
+        getGyrRawValues(&gyrRawVal);
         gyrOffsetVal.x += gyrRawVal.x;
         gyrOffsetVal.y += gyrRawVal.y;
         gyrOffsetVal.z += gyrRawVal.z;
@@ -237,56 +241,45 @@ void ICM20948_WE::readSensor(){
     readAllData(buffer);
 }
 
-xyzFloat ICM20948_WE::getAccRawValues(){
-    xyzFloat accRawVal;
-    accRawVal.x = static_cast<int16_t>(((buffer[0]) << 8) | buffer[1]) * 1.0;
-    accRawVal.y = static_cast<int16_t>(((buffer[2]) << 8) | buffer[3]) * 1.0;
-    accRawVal.z = static_cast<int16_t>(((buffer[4]) << 8) | buffer[5]) * 1.0;
-    return accRawVal;
+void ICM20948_WE::getAccRawValues(xyzFloat *accRawVal){
+    accRawVal->x = static_cast<int16_t>(((buffer[0]) << 8) | buffer[1]) * 1.0;
+    accRawVal->y = static_cast<int16_t>(((buffer[2]) << 8) | buffer[3]) * 1.0;
+    accRawVal->z = static_cast<int16_t>(((buffer[4]) << 8) | buffer[5]) * 1.0;
 }
 
-xyzFloat ICM20948_WE::getCorrectedAccRawValues(){
-    xyzFloat accRawVal = getAccRawValues();   
-    accRawVal = correctAccRawValues(accRawVal);
+void ICM20948_WE::getCorrectedAccRawValues(xyzFloat *corrAccRawVal){
+    getAccRawValues(&(*corrAccRawVal));   
+    correctAccRawValues(&(*corrAccRawVal));
+}
+
+void ICM20948_WE::getGValues(xyzFloat *gVal){
+    getCorrectedAccRawValues(&(*gVal));
     
-    return accRawVal;
+    gVal->x = gVal->x * accRangeFactor / 16384.0;
+    gVal->y = gVal->y * accRangeFactor / 16384.0;
+    gVal->z = gVal->z * accRangeFactor / 16384.0;
 }
 
-xyzFloat ICM20948_WE::getGValues(){
-    xyzFloat gVal, accRawVal;
-    accRawVal = getCorrectedAccRawValues();
+void ICM20948_WE::getAccRawValuesFromFifo(xyzFloat *accRawVal){
+    readICM20948xyzValFromFifo(&(*accRawVal)); 
+}
+
+void ICM20948_WE::getCorrectedAccRawValuesFromFifo(xyzFloat *accRawVal){
+    getAccRawValuesFromFifo(&(*accRawVal));
+    correctAccRawValues(&(*accRawVal));
+}
+
+void ICM20948_WE::getGValuesFromFifo(xyzFloat *gVal){
+    getCorrectedAccRawValuesFromFifo(&(*gVal));
     
-    gVal.x = accRawVal.x * accRangeFactor / 16384.0;
-    gVal.y = accRawVal.y * accRangeFactor / 16384.0;
-    gVal.z = accRawVal.z * accRangeFactor / 16384.0;
-    return gVal;
+    gVal->x = gVal->x * accRangeFactor / 16384.0;
+    gVal->y = gVal->y * accRangeFactor / 16384.0;
+    gVal->z = gVal->z * accRangeFactor / 16384.0;
 }
 
-xyzFloat ICM20948_WE::getAccRawValuesFromFifo(){
-    xyzFloat accRawVal = readICM20948xyzValFromFifo();
-    return accRawVal;   
-}
-
-xyzFloat ICM20948_WE::getCorrectedAccRawValuesFromFifo(){
-    xyzFloat accRawVal = getAccRawValuesFromFifo();
-    accRawVal = correctAccRawValues(accRawVal);
-    
-    return accRawVal;
-}
-
-xyzFloat ICM20948_WE::getGValuesFromFifo(){
-    xyzFloat gVal, accRawVal;
-    accRawVal = getCorrectedAccRawValuesFromFifo();
-    
-    gVal.x = accRawVal.x * accRangeFactor / 16384.0;
-    gVal.y = accRawVal.y * accRangeFactor / 16384.0;
-    gVal.z = accRawVal.z * accRangeFactor / 16384.0;
-    return gVal;
-}
-
-float ICM20948_WE::getResultantG(xyzFloat gVal){
+float ICM20948_WE::getResultantG(xyzFloat *gVal){
     float resultant = 0.0;
-    resultant = sqrt(sq(gVal.x) + sq(gVal.y) + sq(gVal.z));
+    resultant = sqrt(sq(gVal->x) + sq(gVal->y) + sq(gVal->z));
     
     return resultant;
 }
@@ -297,58 +290,44 @@ float ICM20948_WE::getTemperature(){
     return tmp;
 }
 
-xyzFloat ICM20948_WE::getGyrRawValues(){
-    xyzFloat gyrRawVal;
-    
-    gyrRawVal.x = (int16_t)(((buffer[6]) << 8) | buffer[7]) * 1.0;
-    gyrRawVal.y = (int16_t)(((buffer[8]) << 8) | buffer[9]) * 1.0;
-    gyrRawVal.z = (int16_t)(((buffer[10]) << 8) | buffer[11]) * 1.0;
-    
-    return gyrRawVal;
+void ICM20948_WE::getGyrRawValues(xyzFloat *gyrRawVal){
+    gyrRawVal->x = (int16_t)(((buffer[6]) << 8) | buffer[7]) * 1.0;
+    gyrRawVal->y = (int16_t)(((buffer[8]) << 8) | buffer[9]) * 1.0;
+    gyrRawVal->z = (int16_t)(((buffer[10]) << 8) | buffer[11]) * 1.0;
 }
 
-xyzFloat ICM20948_WE::getCorrectedGyrRawValues(){
-    xyzFloat gyrRawVal = getGyrRawValues(); 
-    gyrRawVal = correctGyrRawValues(gyrRawVal);
-    return gyrRawVal;
+void ICM20948_WE::getCorrectedGyrRawValues(xyzFloat *corrGyrVal){
+    getGyrRawValues(&(*corrGyrVal)); 
+    correctGyrRawValues(&(*corrGyrVal));
 }
 
-xyzFloat ICM20948_WE::getGyrValues(){
-    xyzFloat gyrVal = getCorrectedGyrRawValues();
+void ICM20948_WE::getGyrValues(xyzFloat *gyrVal){
+    getCorrectedGyrRawValues(&(*gyrVal));
     
-    gyrVal.x = gyrVal.x * gyrRangeFactor * 250.0 / 32768.0;
-    gyrVal.y = gyrVal.y * gyrRangeFactor * 250.0 / 32768.0;
-    gyrVal.z = gyrVal.z * gyrRangeFactor * 250.0 / 32768.0;
-     
-    return gyrVal;
+    gyrVal->x = gyrVal->x * gyrRangeFactor * 250.0 / 32768.0;
+    gyrVal->y = gyrVal->y * gyrRangeFactor * 250.0 / 32768.0;
+    gyrVal->z = gyrVal->z * gyrRangeFactor * 250.0 / 32768.0;
 }
 
-xyzFloat ICM20948_WE::getGyrValuesFromFifo(){
-    xyzFloat gyrVal;
-    xyzFloat gyrRawVal = readICM20948xyzValFromFifo();
+void ICM20948_WE::getGyrValuesFromFifo(xyzFloat *gyrVal){
+    readICM20948xyzValFromFifo(&(*gyrVal));
     
-    gyrRawVal = correctGyrRawValues(gyrRawVal);
-    gyrVal.x = gyrRawVal.x * gyrRangeFactor * 250.0 / 32768.0;
-    gyrVal.y = gyrRawVal.y * gyrRangeFactor * 250.0 / 32768.0;
-    gyrVal.z = gyrRawVal.z * gyrRangeFactor * 250.0 / 32768.0;
-    
-    return gyrVal;  
+    correctGyrRawValues(&(*gyrVal));
+    gyrVal->x = gyrVal->x * gyrRangeFactor * 250.0 / 32768.0;
+    gyrVal->y = gyrVal->y * gyrRangeFactor * 250.0 / 32768.0;
+    gyrVal->z = gyrVal->z * gyrRangeFactor * 250.0 / 32768.0;
 }
 
-xyzFloat ICM20948_WE::getMagValues(){
+void ICM20948_WE::getMagValues(xyzFloat *mag){
     int16_t x,y,z;
-    
-    xyzFloat mag;
     
     x = static_cast<int16_t>((buffer[15]) << 8) | buffer[14];
     y = static_cast<int16_t>((buffer[17]) << 8) | buffer[16];
     z = static_cast<int16_t>((buffer[19]) << 8) | buffer[18];
     
-    mag.x = x * AK09916_MAG_LSB;
-    mag.y = y * AK09916_MAG_LSB;
-    mag.z = z * AK09916_MAG_LSB;
-    
-    return mag;
+    mag->x = x * AK09916_MAG_LSB;
+    mag->y = y * AK09916_MAG_LSB;
+    mag->z = z * AK09916_MAG_LSB;
 }
 
 /********* Power, Sleep, Standby *********/ 
@@ -393,16 +372,16 @@ void ICM20948_WE::sleep(bool sleep){
         
 /******** Angles and Orientation *********/ 
     
-xyzFloat ICM20948_WE::getAngles(){
-    xyzFloat angleVal;
-    xyzFloat gVal = getGValues();
+void ICM20948_WE::getAngles(xyzFloat *angleVal){
+    xyzFloat gVal;
+    getGValues(&gVal);
     if(gVal.x > 1.0){
         gVal.x = 1.0;
     }
     else if(gVal.x < -1.0){
         gVal.x = -1.0;
     }
-    angleVal.x = (asin(gVal.x)) * 57.296;
+    angleVal->x = (asin(gVal.x)) * 57.296;
     
     if(gVal.y > 1.0){
         gVal.y = 1.0;
@@ -410,7 +389,7 @@ xyzFloat ICM20948_WE::getAngles(){
     else if(gVal.y < -1.0){
         gVal.y = -1.0;
     }
-    angleVal.y = (asin(gVal.y)) * 57.296;
+    angleVal->y = (asin(gVal.y)) * 57.296;
     
     if(gVal.z > 1.0){
         gVal.z = 1.0;
@@ -418,13 +397,12 @@ xyzFloat ICM20948_WE::getAngles(){
     else if(gVal.z < -1.0){
         gVal.z = -1.0;
     }
-    angleVal.z = (asin(gVal.z)) * 57.296;
-    
-    return angleVal;
+    angleVal->z = (asin(gVal.z)) * 57.296;
 }
 
 ICM20948_orientation ICM20948_WE::getOrientation(){
-    xyzFloat angleVal = getAngles();
+    xyzFloat angleVal;
+    getAngles(&angleVal);
     ICM20948_orientation orientation = ICM20948_FLAT;
     if(abs(angleVal.x) < 45){      // |x| < 45
         if(abs(angleVal.y) < 45){      // |y| < 45
@@ -470,13 +448,15 @@ String ICM20948_WE::getOrientationAsString(){
 }
     
 float ICM20948_WE::getPitch(){
-    xyzFloat angleVal = getAngles();
+    xyzFloat angleVal;
+    getAngles(&angleVal);
     float pitch = (atan2(-angleVal.x, sqrt(abs((angleVal.y*angleVal.y + angleVal.z*angleVal.z))))*180.0)/M_PI;
     return pitch;
 }
     
 float ICM20948_WE::getRoll(){
-    xyzFloat angleVal = getAngles();
+    xyzFloat angleVal;
+    getAngles(&angleVal);
     float roll = (atan2(angleVal.y, angleVal.z)*180.0)/M_PI;
     return roll;
 }
@@ -789,20 +769,16 @@ void ICM20948_WE::setClockToAutoSelect(){
     delay(10);
 }
 
-xyzFloat ICM20948_WE::correctAccRawValues(xyzFloat accRawVal){
-    accRawVal.x = (accRawVal.x -(accOffsetVal.x / accRangeFactor)) / accCorrFactor.x;
-    accRawVal.y = (accRawVal.y -(accOffsetVal.y / accRangeFactor)) / accCorrFactor.y;
-    accRawVal.z = (accRawVal.z -(accOffsetVal.z / accRangeFactor)) / accCorrFactor.z;
-    
-    return accRawVal;
+void ICM20948_WE::correctAccRawValues(xyzFloat *corrAccRawVal){
+    corrAccRawVal->x = (corrAccRawVal->x -(accOffsetVal.x / accRangeFactor)) / accCorrFactor.x;
+    corrAccRawVal->y = (corrAccRawVal->y -(accOffsetVal.y / accRangeFactor)) / accCorrFactor.y;
+    corrAccRawVal->z = (corrAccRawVal->z -(accOffsetVal.z / accRangeFactor)) / accCorrFactor.z;
 }
 
-xyzFloat ICM20948_WE::correctGyrRawValues(xyzFloat gyrRawVal){
-    gyrRawVal.x -= (gyrOffsetVal.x / gyrRangeFactor);
-    gyrRawVal.y -= (gyrOffsetVal.y / gyrRangeFactor);
-    gyrRawVal.z -= (gyrOffsetVal.z / gyrRangeFactor);
-    
-    return gyrRawVal;
+void ICM20948_WE::correctGyrRawValues(xyzFloat *corrGyrRawVal){
+    corrGyrRawVal->x -= (gyrOffsetVal.x / gyrRangeFactor);
+    corrGyrRawVal->y -= (gyrOffsetVal.y / gyrRangeFactor);
+    corrGyrRawVal->z -= (gyrOffsetVal.z / gyrRangeFactor);
 }
 
 void ICM20948_WE::switchBank(uint8_t newBank){
@@ -947,9 +923,8 @@ void ICM20948_WE::readAllData(uint8_t* data){
     }
 }
 
-xyzFloat ICM20948_WE::readICM20948xyzValFromFifo(){
+void ICM20948_WE::readICM20948xyzValFromFifo(xyzFloat *xyzResult){
     uint8_t fifoTriple[6];
-    xyzFloat xyzResult = {0.0, 0.0, 0.0};
     switchBank(0);
    
     if(!useSPI){
@@ -975,11 +950,9 @@ xyzFloat ICM20948_WE::readICM20948xyzValFromFifo(){
         _spi->endTransaction();
     }
     
-    xyzResult.x = (static_cast<int16_t>((fifoTriple[0]<<8) + fifoTriple[1])) * 1.0;
-    xyzResult.y = (static_cast<int16_t>((fifoTriple[2]<<8) + fifoTriple[3])) * 1.0;
-    xyzResult.z = (static_cast<int16_t>((fifoTriple[4]<<8) + fifoTriple[5])) * 1.0;
-    
-    return xyzResult; 
+    xyzResult->x = (static_cast<int16_t>((fifoTriple[0]<<8) + fifoTriple[1])) * 1.0;
+    xyzResult->y = (static_cast<int16_t>((fifoTriple[2]<<8) + fifoTriple[3])) * 1.0;
+    xyzResult->z = (static_cast<int16_t>((fifoTriple[4]<<8) + fifoTriple[5])) * 1.0;
 }
 
 void ICM20948_WE::writeAK09916Register8_SLV4(uint8_t reg, uint8_t val){

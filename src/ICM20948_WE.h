@@ -243,8 +243,10 @@ class ICM20948_WE
         ICM20948_WE(uint8_t addr = 0x68) : _wire{&Wire}, i2cAddress{addr}, useSPI{false} {}
         ICM20948_WE(TwoWire *w, uint8_t addr = 0x68) : _wire{w}, i2cAddress{addr}, useSPI{false} {}
         ICM20948_WE(int cs, bool spi) : _spi{&SPI}, csPin{cs}, useSPI{spi} {}
-        ICM20948_WE(SPIClass *s, int cs, bool spi) : _spi{s}, csPin{cs}, useSPI{spi} {} 
-    
+        ICM20948_WE(SPIClass *s, int cs, bool spi, bool pC = false) 
+            : _spi{s}, csPin{cs}, useSPI{spi}, spiPinsChanged{pC}  {} 
+        ICM20948_WE(SPIClass *s, int cs, int mosi, int miso, int scl, bool spi, bool pC = true) 
+            : _spi{s}, csPin{cs}, mosiPin{mosi}, misoPin{miso}, sclPin{scl}, useSPI{spi}, spiPinsChanged{pC} {}
    
        /* Basic settings */
 
@@ -273,24 +275,24 @@ class ICM20948_WE
         /* x,y,z results */
         
         void readSensor(); 
-        xyzFloat getAccRawValues();
-        xyzFloat getCorrectedAccRawValues();
-        xyzFloat getGValues();
-        xyzFloat getAccRawValuesFromFifo();
-        xyzFloat getCorrectedAccRawValuesFromFifo();
-        xyzFloat getGValuesFromFifo();
-        float getResultantG(xyzFloat gVal); 
+        void getAccRawValues(xyzFloat *accRawVal);
+        void getCorrectedAccRawValues(xyzFloat *corrAccRawVal);
+        void getGValues(xyzFloat *gVal);
+        void getAccRawValuesFromFifo(xyzFloat *accRawVal);
+        void getCorrectedAccRawValuesFromFifo(xyzFloat *accRawVal);
+        void getGValuesFromFifo(xyzFloat *gVal);
+        float getResultantG(xyzFloat *gVal); 
         float getTemperature();
-        xyzFloat getGyrRawValues();
-        xyzFloat getCorrectedGyrRawValues();
-        xyzFloat getGyrValues(); 
-        xyzFloat getGyrValuesFromFifo();
-        xyzFloat getMagValues();
+        void getGyrRawValues(xyzFloat *gyrRawVal);
+        void getCorrectedGyrRawValues(xyzFloat *corrGyrVal);
+        void getGyrValues(xyzFloat *gyrVal); 
+        void getGyrValuesFromFifo(xyzFloat *gyrVal);
+        void getMagValues(xyzFloat *mag);
         
             
         /* Angles and Orientation */ 
         
-        xyzFloat getAngles();
+        void getAngles(xyzFloat *angleVal);
         ICM20948_orientation getOrientation();
         String getOrientationAsString();
         float getPitch();
@@ -352,18 +354,19 @@ class ICM20948_WE
         uint8_t gyrRangeFactor;
         uint8_t regVal;   // intermediate storage of register values
         ICM20948_fifoType fifoType;
-        int csPin;
+        int csPin, mosiPin, misoPin, sclPin;
         bool useSPI;
+        bool spiPinsChanged;
         void setClockToAutoSelect();
-        xyzFloat correctAccRawValues(xyzFloat accRawVal);
-        xyzFloat correctGyrRawValues(xyzFloat gyrRawVal);
+        void correctAccRawValues(xyzFloat *corrAccRawVal);
+        void correctGyrRawValues(xyzFloat *gyrVal);
         void switchBank(uint8_t newBank);
         void writeRegister8(uint8_t bank, uint8_t reg, uint8_t val);
         void writeRegister16(uint8_t bank, uint8_t reg, int16_t val);
         uint8_t readRegister8(uint8_t bank, uint8_t reg);
         int16_t readRegister16(uint8_t bank, uint8_t reg);
         void readAllData(uint8_t* data);
-        xyzFloat readICM20948xyzValFromFifo();
+        void readICM20948xyzValFromFifo(xyzFloat *xyzResult);
         void writeAK09916Register8_SLV4(uint8_t reg, uint8_t val);
         uint8_t readAK09916Register8_SLV4(uint8_t reg);
         int16_t readAK09916Register16(uint8_t reg);
