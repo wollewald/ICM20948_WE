@@ -108,10 +108,11 @@ void setup() {
 }
 
 void loop() {
+  xyzFloat gValue;
+  xyzFloat angle;
   myIMU.readSensor();
-  
-  xyzFloat gValue = myIMU.getGValues();
-  xyzFloat angle = myIMU.getAngles();
+  myIMU.getGValues(&gValue);
+  myIMU.getAngles(&angle);
   
 /* For g-values the corrected raws are used */
   Serial.print("g-x      = ");
