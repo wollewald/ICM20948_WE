@@ -107,9 +107,12 @@ void setup() {
 }
 
 void loop() {
+  xyzFloat gValue;
+  xyzFloat angle;
   myIMU.readSensor();
-  xyzFloat gValue = myIMU.getGValues();
-  xyzFloat angle = myIMU.getAngles();
+  myIMU.getGValues(&gValue);
+  myIMU.getAngles(&angle);
+ 
   float pitch = myIMU.getPitch();
   float roll  = myIMU.getRoll();
  
