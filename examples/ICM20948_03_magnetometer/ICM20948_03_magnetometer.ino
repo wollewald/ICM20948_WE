@@ -61,8 +61,9 @@ void setup() {
 }
 
 void loop() {
+  xyzFloat magValue; // x/y/z magnetic flux density [µT] 
   myIMU.readSensor();
-  xyzFloat magValue = myIMU.getMagValues(); // returns magnetic flux density [µT]
+  myIMU.getMagValues(&magValue);
 
   Serial.println("Magnetometer Data in µTesla: ");
   Serial.print(magValue.x);
