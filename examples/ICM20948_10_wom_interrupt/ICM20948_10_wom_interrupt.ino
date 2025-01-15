@@ -125,7 +125,7 @@ void setup() {
    *  cleared by any read or will only be cleared if the interrupt status register is 
    *  read (default).
    */
-   //myIMU.enableClearIntByAnyRead(true);
+//  myIMU.enableClearIntByAnyRead(true);
 
   /*  Set the FSync interrupt pin:
    *  ICM20948_ACT_LOW  = active-low
@@ -161,7 +161,7 @@ void loop() {
 
   if((millis()%1000) == 0){
     myIMU.readSensor();
-    gValue = myIMU.getGValues();
+    myIMU.getGValues(&gValue);
     
     Serial.print(gValue.x);
     Serial.print("   ");
