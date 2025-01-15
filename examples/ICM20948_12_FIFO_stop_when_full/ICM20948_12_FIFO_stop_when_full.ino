@@ -238,8 +238,10 @@ void printFifo(){
   Serial.println(dataSets);
 
   for(int i=0; i<dataSets; i++){
-    xyzFloat gValue = myIMU.getGValuesFromFifo();
-    xyzFloat gyr = myIMU.getGyrValuesFromFifo();
+    xyzFloat gValue;
+    xyzFloat gyr;
+    myIMU.getGValuesFromFifo(&gValue);
+    myIMU.getGyrValuesFromFifo(&gyr);
     Serial.print("Data set ");
     Serial.print(i+1);
     Serial.println(":");
