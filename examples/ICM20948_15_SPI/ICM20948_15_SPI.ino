@@ -13,7 +13,7 @@
 
 #include <SPI.h>
 #include <ICM20948_WE.h>
-#define CS_PIN 10   // Chip Select Pin
+#define CS_PIN 5   // Chip Select Pin
 bool spi = true;
 
 /* There are several ways to create your ICM20948 object:
@@ -23,9 +23,10 @@ bool spi = true;
  * ICM20948_WE myIMU = ICM20948_WE(&wire2, ICM20948_ADDR) -> all I2C together
  * ICM20948_WE myIMU = ICM20948_WE(CS_PIN, spi);  -> uses SPI, spi is just a flag, see SPI example
  * ICM20948_WE myIMU = ICM20948_WE(&SPI, CS_PIN, spi);  -> uses SPI / passes the SPI object, spi is just a flag, see SPI example
+ * ICM20948_WE myIMU = ICM20948_WE(&SPI, CS_PIN, MOSI_PIN, MISO_PIN, SCK_PIN, spi); -> change of the standard SPI pins
  * Successfully tested with two I2C busses on an ESP32
  */
- ICM20948_WE myIMU = ICM20948_WE(CS_PIN, spi);
+ICM20948_WE myIMU = ICM20948_WE(&SPI, CS_PIN, spi);
 
 void setup() {
   //delay(2000); // maybe needed for some MCUs, in particular for startup after power off 
@@ -191,12 +192,15 @@ void setup() {
 }
 
 void loop() {
+  xyzFloat gValue; 
+  xyzFloat gyr; 
+  xyzFloat magValue;
   myIMU.readSensor();
-  xyzFloat gValue = myIMU.getGValues();
-  xyzFloat gyr = myIMU.getGyrValues();
-  xyzFloat magValue = myIMU.getMagValues();
+  myIMU.getGValues(&gValue);
+  myIMU.getGyrValues(&gyr);
+  myIMU.getMagValues(&magValue);
   float temp = myIMU.getTemperature();
-  float resultantG = myIMU.getResultantG(gValue);
+  float resultantG = myIMU.getResultantG(&gValue);
 
   Serial.println("Acceleration in g (x,y,z):");
   Serial.print(gValue.x);
