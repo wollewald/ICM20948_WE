@@ -92,9 +92,11 @@ void setup() {
 }
 
 void loop() {
+  xyzFloat gyrRaw; 
+  xyzFloat gyr;
   myIMU.readSensor();
-  xyzFloat gyrRaw = myIMU.getCorrectedGyrRawValues();
-  xyzFloat gyr = myIMU.getGyrValues();
+  myIMU.getCorrectedGyrRawValues(&gyrRaw);
+  myIMU.getGyrValues(&gyr);
     
   Serial.println("Raw gyroscope values (x,y,z):");
   Serial.print(gyrRaw.x);
