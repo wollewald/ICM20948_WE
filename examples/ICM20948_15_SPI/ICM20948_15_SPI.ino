@@ -23,7 +23,7 @@ bool spi = true;
  * ICM20948_WE myIMU = ICM20948_WE(&wire2, ICM20948_ADDR) -> all I2C together
  * ICM20948_WE myIMU = ICM20948_WE(CS_PIN, spi);  -> uses SPI, spi is just a flag, see SPI example
  * ICM20948_WE myIMU = ICM20948_WE(&SPI, CS_PIN, spi);  -> uses SPI / passes the SPI object, spi is just a flag, see SPI example
- * ICM20948_WE myIMU = ICM20948_WE(&SPI, CS_PIN, MOSI_PIN, MISO_PIN, SCK_PIN, spi); -> change of the standard SPI pins
+ * ICM20948_WE myIMU = ICM20948_WE(&SPI, CS_PIN, MOSI_PIN, MISO_PIN, SCK_PIN, spi); -> change of the standard SPI pins (only ESP32)
  * Successfully tested with two I2C busses on an ESP32
  */
 ICM20948_WE myIMU = ICM20948_WE(&SPI, CS_PIN, spi);
