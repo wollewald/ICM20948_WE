@@ -25,12 +25,16 @@ bool ICM20948_WE::init(){
     if(useSPI){
         pinMode(csPin, OUTPUT);
         digitalWrite(csPin, HIGH);
+#if defined(ESP32)
         if(spiPinsChanged){
             _spi->begin(sclPin, misoPin, mosiPin, csPin);
         }
         else{
             _spi->begin();
         }
+#else
+    _spi->begin();
+#endif
         mySPISettings = SPISettings(7000000, MSBFIRST, SPI_MODE0);      
     }   
     currentBank = 0;
