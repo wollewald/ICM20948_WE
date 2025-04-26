@@ -175,7 +175,7 @@ void setup() {
    *  ICM20948_ACT_LOW  = active-low
    *  ICM20948_ACT_HIGH = active-high (default) 
    */
-   //myIMU.setFSyncIntPinPolarity(ICM20948_ACT_LOW);
+   //myIMU.setFSyncIntPolarity(ICM20948_ACT_LOW);
 
    /* The following interrupts can be enabled or disabled:
     *  ICM20948_FSYNC_INT        FSYNC pin interrupt, can't propagate to the INT pin  
