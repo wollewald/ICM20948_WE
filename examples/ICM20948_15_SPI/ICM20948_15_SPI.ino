@@ -28,6 +28,20 @@ bool spi = true;
  */
 ICM20948_WE myIMU = ICM20948_WE(&SPI, CS_PIN, spi);
 
+/* Changing SPI pins on STM32 boards can be a bit diffcult - the following worked on a Nucleo-L432KC board:
+
+    #define CS_PIN D3   
+    #define MOSI_PIN A6 
+    #define MISO_PIN D10 
+    #define SCK_PIN A1 
+    bool spi = true;
+    ICM20948_WE myIMU = ICM20948_WE(&SPI, CS_PIN, MOSI_PIN, MISO_PIN, SCK_PIN, spi);
+
+   Or, using the same pins:
+    SPIClass mySPI(MOSI_PIN, MISO_PIN, SCK_PIN); // don't pass the CS-Pin (=SSEL)
+    ICM20948_WE myIMU = ICM20948_WE(&mySPI, CS_PIN, spi);
+*/
+
 void setup() {
   //delay(2000); // maybe needed for some MCUs, in particular for startup after power off 
   Serial.begin(115200);
