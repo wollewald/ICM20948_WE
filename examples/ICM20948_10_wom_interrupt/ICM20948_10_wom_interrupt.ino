@@ -168,6 +168,7 @@ void loop() {
     Serial.print(gValue.y);
     Serial.print("   ");
     Serial.println(gValue.z);
+    delay(1);
   }
   if(motion){
     byte source = myIMU.readAndClearInterrupts();
