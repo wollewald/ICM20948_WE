@@ -27,13 +27,20 @@ bool ICM20948_WE::init(){
         digitalWrite(csPin, HIGH);
 #if defined(ESP32)
         if(spiPinsChanged){
-            _spi->begin(sclPin, misoPin, mosiPin, csPin);
+            _spi->begin(sckPin, misoPin, mosiPin, csPin);
         }
         else{
             _spi->begin();
         }
+#elif defined(ARDUINO_ARCH_STM32)
+        if(spiPinsChanged){
+            _spi->setMISO(misoPin);
+            _spi->setMOSI(mosiPin);
+            _spi->setSCLK(sckPin);
+        }
+        _spi->begin();
 #else
-    _spi->begin();
+        _spi->begin();
 #endif
         mySPISettings = SPISettings(7000000, MSBFIRST, SPI_MODE0);      
     }   
@@ -822,6 +829,7 @@ void ICM20948_WE::writeRegister8(uint8_t bank, uint8_t reg, uint8_t val){
         digitalWrite(csPin, HIGH);
         _spi->endTransaction();
     }
+    delayMicroseconds(5);
 }
 
 void ICM20948_WE::writeRegister16(uint8_t bank, uint8_t reg, int16_t val){
@@ -844,6 +852,7 @@ void ICM20948_WE::writeRegister16(uint8_t bank, uint8_t reg, int16_t val){
         digitalWrite(csPin, HIGH);
         _spi->endTransaction();
     }
+    delayMicroseconds(5);
 }
 
 uint8_t ICM20948_WE::readRegister8(uint8_t bank, uint8_t reg){
@@ -964,14 +973,16 @@ void ICM20948_WE::writeAK09916Register8_SLV4(uint8_t reg, uint8_t val){
     writeRegister8(3, ICM20948_I2C_SLV4_DO, val);
     writeRegister8(3, ICM20948_I2C_SLV4_REG, reg); // define AK09916 register to be written to
     writeRegister8(3, ICM20948_I2C_SLV4_CTRL, ICM20948_I2C_SLVX_EN);
-    while(readRegister8(3, ICM20948_I2C_SLV4_CTRL) & ICM20948_I2C_SLVX_EN){;}
+    unsigned long int startRead = millis(); // to avoid that the code hangs
+    while((readRegister8(3, ICM20948_I2C_SLV4_CTRL) & ICM20948_I2C_SLVX_EN) && (millis() - startRead < 100)){;}
 }
 
 uint8_t ICM20948_WE::readAK09916Register8_SLV4(uint8_t reg){ // only as slave 4
     writeRegister8(3, ICM20948_I2C_SLV4_ADDR, AK09916_ADDRESS | AK09916_READ); // read AK09916
     writeRegister8(3, ICM20948_I2C_SLV4_REG, reg); // define AK09916 register to be read
     writeRegister8(3, ICM20948_I2C_SLV4_CTRL, ICM20948_I2C_SLVX_EN);
-    while(readRegister8(3, ICM20948_I2C_SLV4_CTRL) & ICM20948_I2C_SLVX_EN){;}
+    unsigned long int startRead = millis(); // to avoid that the code hangs
+    while((readRegister8(3, ICM20948_I2C_SLV4_CTRL) & ICM20948_I2C_SLVX_EN) && (millis() - startRead < 100)){;}
     return readRegister8(3, ICM20948_I2C_SLV4_DI);
 }
 

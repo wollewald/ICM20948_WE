@@ -245,8 +245,8 @@ class ICM20948_WE
         ICM20948_WE(int cs, bool spi) : _spi{&SPI}, csPin{cs}, useSPI{spi} {}
         ICM20948_WE(SPIClass *s, int cs, bool spi, bool pC = false) 
             : _spi{s}, csPin{cs}, useSPI{spi}, spiPinsChanged{pC}  {} 
-        ICM20948_WE(SPIClass *s, int cs, int mosi, int miso, int scl, bool spi, bool pC = true) 
-            : _spi{s}, csPin{cs}, mosiPin{mosi}, misoPin{miso}, sclPin{scl}, useSPI{spi}, spiPinsChanged{pC} {}
+        ICM20948_WE(SPIClass *s, int cs, int mosi, int miso, int sck, bool spi, bool pC = true) 
+            : _spi{s}, csPin{cs}, mosiPin{mosi}, misoPin{miso}, sckPin{sck}, useSPI{spi}, spiPinsChanged{pC} {}
    
        /* Basic settings */
 
@@ -354,7 +354,7 @@ class ICM20948_WE
         uint8_t gyrRangeFactor;
         uint8_t regVal;   // intermediate storage of register values
         ICM20948_fifoType fifoType;
-        int csPin, mosiPin, misoPin, sclPin;
+        int csPin, mosiPin, misoPin, sckPin;
         bool useSPI;
         bool spiPinsChanged;
         void setClockToAutoSelect();
