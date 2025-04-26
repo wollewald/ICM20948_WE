@@ -91,6 +91,7 @@ void loop() {
   myIMU.sleep(true);  // set the ICM20948 to sleep mode
   delay(10000);
   myIMU.sleep(false);  // wake up the ICM20948
+  delay(10);
   myIMU.setMagOpMode(AK09916_CONT_MODE_20HZ); // wake up the magnetometer
   delay(200); // give it a bit of time
 }
