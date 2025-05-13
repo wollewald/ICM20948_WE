@@ -13,7 +13,7 @@ If you find bugs please inform me. If you like the library it would be great if 
 
 If you are not familiar with the ICM20948 I recommend to work through the example sketches.
 
-When you wire the ICM-20948 you need to consider that VDD is 3.3 volts, but VDDIO is only 1.71-1.95 volts (see data sheet). For a 5V MCU board, I used a level shifter and additional resistors to GND which form a voltage divider together with the internal resistors of the level shifter.
+When you wire the ICM-20948 you need to consider that the voltage range for VDD is 1.71 to 3.6 volts, but VDDIO is only 1.71-1.95 volts (see data sheet). Most cheap modules have VDDIO internally connected to VDD. Therefore you need to power them with 1.71 to 1.95 volts. 
 
 <h3>Important note on release 1.2.2</h3>
 Version 1.2.2 is not fully compatible with former versions. Many functions like getGValues() returned xyzFloat structures. To be exact, the functions did return pointers to the structures which were created by library functions. But after returning from the functions the memory space where the structures were located can be overwritten. I have changed that by passing the xyzFloat variables by reference. Here is an example:  
