@@ -13,7 +13,16 @@ If you find bugs please inform me. If you like the library it would be great if 
 
 If you are not familiar with the ICM20948 I recommend to work through the example sketches.
 
-When you wire the ICM-20948 you need to consider that the voltage range for VDD is 1.71 to 3.6 volts, but VDDIO is only 1.71-1.95 volts (see data sheet). Most cheap modules have VDDIO internally connected to VDD. Therefore you need to power them with 1.71 to 1.95 volts. 
+<h3>Voltage Supply</h3>
+
+When you wire the ICM-20948 you need to consider that the voltage range for VDD is 1.71 to 3.6 volts, but VDDIO is only 1.71-1.95 volts (see data sheet). Many cheap modules have VDDIO internally connected to VDD. Therefore you need to power them with 1.71 to 1.95 volts. Boards from Sparkfun, Pimoroni, Adafruit and others do have voltage regulators level shifters for the digital pins. 
+
+There are also boards available called "version 2" or "v2". They have voltage regulators, but not all digital Pins Here you need to look into the details: 
+
+<img width="1800" height="802" alt="icm20948_version_2" src="https://github.com/user-attachments/assets/6f585f2c-2cb5-4beb-b187-8fc57fb7e8a2" />
+
+The module on the left has four MOSFETs for the level shifting of the pins labeled as SDA, SCL, SDO and INT. All fine with this. The right one has only two MOSFETs (combined in the highlight 6-pin) shifting the levels at SDA and SCL.Therefore they can only be used for I2C-communication. But still you have to take of the INT-pin. If it goes HIGH it just has 1.8 V, which may not be recognized as a HIGH level by your microcontroller.
+
 
 <h3>(Formerly) Known issue</h3>
 Before version 1.2.0, using my library caused sporadic connection issues after re-powering. This has been solved by setting up the magnetometer as SLV4. The magnetometer data reading is still done using the magnetometer as SLV0. Please inform me if you should still have issues.      
